@@ -37,7 +37,7 @@ Bài phù hợp với môn vì được xây từ các khối quen thuộc: kern
 
 ## Kế hoạch thực hiện
 
-Nhóm dự kiến chọn **Core scope** (chưa chốt). Chi tiết từng bước nằm trong [Instruction.md](Instruction.md).
+Nhóm dự kiến chọn **Core scope** (chưa chốt). Chi tiết từng bước nằm trong [Docs/Instruction.md](Docs/Instruction.md), lịch và phân công nằm trong [Docs/implementation_plan.md](Docs/implementation_plan.md).
 
 | Mã | Nội dung | Vai trò |
 |---|---|---|
@@ -51,12 +51,19 @@ Nhóm dự kiến chọn **Core scope** (chưa chốt). Chi tiết từng bướ
 
 ## Nội dung repo
 
-| File | Mô tả |
+| File / thư mục | Mô tả |
 |---|---|
-| [README.md](README.md) | Giới thiệu project |
-| [Instruction.md](Instruction.md) | Hướng dẫn chi tiết các bước chạy lại thực nghiệm theo yêu cầu của môn |
+| [README.md](README.md) | Giới thiệu project, cài đặt và cách chạy |
+| [Docs/Instruction.md](Docs/Instruction.md) | Hướng dẫn chi tiết các bước chạy lại thực nghiệm theo yêu cầu của môn |
+| [Docs/implementation_plan.md](Docs/implementation_plan.md) | Kế hoạch theo sprint, phân công và lịch làm việc |
+| [Randumbofficial.pdf](Randumbofficial.pdf) | Bản arXiv của bài báo |
+| [src/randumb/](src/randumb/) | Cài đặt phương pháp: RFF, thống kê, bộ phân loại, dữ liệu, W&B |
+| [scripts/](scripts/) | Chạy một thực nghiệm, trích đặc trưng ViT |
+| [notebooks/](notebooks/) | Notebook Kaggle cho từng thực nghiệm |
+| [tests/](tests/) | Kiểm thử bắt buộc trước khi chạy thực nghiệm |
+| [verification/](verification/) | Script kiểm chứng với code gốc, không chứa code gốc |
 
-Mã nguồn, notebook và test sẽ được thêm theo cấu trúc đề xuất trong [Instruction.md](Instruction.md).
+Các hàm trong `src/randumb/` hiện mới có chữ ký và docstring; phần cài đặt làm ở Sprint 1.
 
 ## Cài đặt và chạy
 

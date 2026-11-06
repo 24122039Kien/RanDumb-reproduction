@@ -74,13 +74,14 @@ Tài liệu này chỉ nói ai làm gì và khi nào. Công thức, cấu hình 
 - [ ] Đọc Mục 2 và 3 của bài báo.
 
 **Đăng**
-- [ ] Chuyển `randumb_benchmark.py` ra ngoài `ProjectPaper/`. File này lặp lại pipeline của tác giả nên không được commit.
-- [ ] Chạy `git init`, thêm `.gitignore`, đưa repo lên GitHub public.
-- [ ] Tạo cấu trúc thư mục theo Bước 0 của Instruction.md.
+- [x] Repo đã có trên GitHub (`24122039Kien/RanDumb-reproduction`), có `.gitignore`.
+- [x] Đã tạo khung cấu trúc thư mục: các hàm mới có chữ ký và docstring.
+- [x] `randumb_benchmark.py` nằm trong `.gitignore` nên không bị commit. File này lặp lại pipeline của tác giả.
+- [ ] Clone repo và commit lần đầu bằng tài khoản của mình.
 
 **Kiên**
 - [ ] Tạo W&B project public, kiểm tra mở được khi chưa đăng nhập.
-- [ ] Tạo notebook Kaggle với GPU T4 x2, Internet On; lưu `WANDB_API_KEY` vào Secrets.
+- [ ] Tạo notebook Kaggle với GPU T4 x2, Internet On; lưu `WANDB_API_KEY` vào Secrets. Notebook mẫu: `notebooks/00_kaggle_smoke.ipynb`.
 - [ ] Ghi lại phiên bản Python và torch trên Kaggle để ghim `requirements.txt`.
 - [ ] Log một run thử với thẻ `smoke`.
 
@@ -110,9 +111,60 @@ Tài liệu này chỉ nói ai làm gì và khi nào. Công thức, cấu hình 
 - [ ] **08/11:** `run_experiment.py` nhận tham số dòng lệnh, log độ chính xác, thời gian và bộ nhớ đỉnh. Chạy MNIST, CIFAR-10 ở D = 1.000.
 
 **Huy**
-- [ ] **06-07/11:** Viết phần bối cảnh của deck: bài toán, ví dụ thực tế của nhóm, ít nhất 2 phương pháp tiền nhiệm.
-- [ ] **07/11:** Viết phần đóng góp: theo lời của bài, rồi xếp lại thành lý thuyết, kỹ thuật, thực nghiệm.
+- [ ] **06-07/11:** Làm 4 slide phần bối cảnh của deck, kèm speaker notes. Xem hướng dẫn bên dưới.
+- [ ] **07/11:** Làm 2 slide phần đóng góp, kèm speaker notes. Xem hướng dẫn bên dưới.
 - [ ] **08/11:** Viết script trong `verification/` để clone code gốc vào thư mục tạm và ghim commit.
+
+#### Hướng dẫn cho Huy: phần bối cảnh và đóng góp
+
+**Đây là làm slide, không phải viết báo cáo Word.** Môn không có buổi thuyết trình, nên người chấm chỉ đọc file pptx. Mỗi slide gồm hai phần:
+
+| Phần | Chứa gì | Yêu cầu của môn |
+|---|---|---|
+| **Mặt slide** | Bảng, sơ đồ, hình tự vẽ, vài gạch đầu dòng ngắn | Dùng hình và bảng, không viết đoạn văn dài |
+| **Speaker notes** (ô ghi chú bên dưới slide trong PowerPoint) | Lời giải thích đầy đủ, như lời bạn sẽ nói nếu được thuyết trình | Slide nào cũng phải có, tối đa 500 từ |
+
+**Sản phẩm:** khoảng 6 slide nháp trong một file pptx, kèm notes cho từng slide. Đến Sprint 4, các slide này được ghép vào deck chung 20-40 slide.
+
+| # | Slide | Mặt slide | Speaker notes |
+|---|---|---|---|
+| 1 | Bài toán | Hình tự vẽ luồng dữ liệu theo thời gian, kèm ví dụ thực tế của nhóm | Online continual learning là gì; vì sao ví dụ của nhóm buộc phải học trực tuyến và không lưu mẫu |
+| 2 | Giả định bị nghi ngờ | Câu hỏi: "học biểu diễn trong online continual learning có thật sự tốt hơn biểu diễn cố định không?" | Vì sao giả định này phổ biến, và vì sao theo tác giả nó chưa từng được kiểm chứng |
+| 3 | Các phương pháp tiền nhiệm | Bảng 4 cột: phương pháp, ý chính, hạn chế, hệ quả | Giải thích từng phương pháp |
+| 4 | Khoảng trống dẫn đến RanDumb | Sơ đồ so sánh: không cần backbone pretrained, không lưu mẫu, chỉ học một lượt | Vì sao khoảng trống này đáng quan tâm |
+| 5 | Đóng góp theo lời bài báo | 4-5 gạch đầu dòng, diễn đạt lại bằng lời của nhóm | Giải thích từng đóng góp |
+| 6 | Xếp loại đóng góp | Bảng 3 cột: loại, đóng góp, trước đây chưa làm được gì | Lý do xếp loại, và điều gì là mới so với các tiền nhiệm |
+
+**Yêu cầu của môn cho hai phần này** (trang Reading):
+- **Bài toán:** nêu đơn giản, kèm **một ví dụ thực tế do nhóm tự nghĩ**. Ví dụ gợi ý, nhóm nên tự chọn ví dụ khác: camera kiểm tra lỗi sản phẩm trong nhà máy, thỉnh thoảng có loại lỗi mới, thiết bị có bộ nhớ nhỏ và mỗi ảnh chỉ xử lý một lần.
+- **Tiền nhiệm:** ít nhất 2 phương pháp. Với mỗi phương pháp, nêu đủ ý chính, hạn chế và **hệ quả thực tế của hạn chế**. Môn nói rõ: nêu hạn chế mà không có hệ quả thì không được tính là phân tích.
+- **Đóng góp:** liệt kê theo cách bài báo nói, rồi xếp lại thành lý thuyết, kỹ thuật, thực nghiệm. Với mỗi đóng góp, nêu điều gì trước đây chưa làm được hoặc chưa ai thử.
+
+**Gợi ý tiền nhiệm** (cần đọc lại bài gốc để kiểm tra trước khi đưa vào slide):
+
+| Phương pháp | Ý chính | Hạn chế | Hệ quả |
+|---|---|---|---|
+| **SLDA** (Hayes và Kanan, 2020), bài báo ghi là "tương tự" | Giữ nguyên một CNN đã huấn luyện sẵn; chỉ cập nhật trung bình lớp và hiệp phương sai chung theo từng mẫu | Phụ thuộc hoàn toàn vào bộ trích đặc trưng đã huấn luyện sẵn | Không dùng được khi phải học từ pixel; LDA trên pixel thô thì kém (Bảng 6 của bài: CIFAR-10 đạt 41,6 so với 55,6 của RanDumb) |
+| **GDumb** (Prabhu và cộng sự, 2020), cùng tác giả chính | Lưu bộ nhớ mẫu cân bằng giữa các lớp, rồi huấn luyện lại mạng từ đầu trên bộ nhớ đó; một baseline đơn giản nhưng vượt nhiều phương pháp phức tạp | Phải lưu mẫu và huấn luyện lại mạng sâu | Không dùng được khi bị cấm lưu dữ liệu hoặc bộ nhớ rất nhỏ; tốn tính toán |
+| **RanPAC** (McDonnell và cộng sự, 2023), không bắt buộc | Chiếu ngẫu nhiên đặc trưng của mô hình pretrained lên nhiều chiều, rồi dùng bộ phân loại tuyến tính | Cần backbone pretrained mạnh | Không áp dụng được cho học từ pixel |
+
+**Gợi ý xếp loại đóng góp** (theo trang 1-3 của bài):
+
+| Loại | Đóng góp | Trước đây chưa làm được gì |
+|---|---|---|
+| **Lý thuyết** | Gần như không có: không có định lý mới, chỉ có trực giác về kernel và khử tương quan (Hình 2) | Nên nói thẳng điều này; đây cũng là ý cho phần Critique sau này |
+| **Kỹ thuật** | Ghép các khối có sẵn (RFF, LDA dạng streaming, NCM) thành một phương pháp học từ pixel, không lưu mẫu, một lượt | SLDA cần backbone đã huấn luyện sẵn; GDumb cần lưu mẫu |
+| **Thực nghiệm** | So sánh trên benchmark A-F; hai phát hiện: biểu diễn học được kém hơn biểu diễn ngẫu nhiên, và benchmark bị ràng buộc quá chặt | Chưa ai kiểm chứng giả định "biểu diễn học được tốt hơn biểu diễn cố định" trong online continual learning |
+
+Một chi tiết nên nêu: Bảng 1 trái cho thấy RanDumb **thua** PEC 3,3 điểm trên CIFAR-10, nên câu "vượt mọi phương pháp" không đúng ở mọi dataset.
+
+**Lưu ý khi làm slide:**
+- **Thứ tự đọc bài:** tóm tắt, mở đầu, kết luận, các công trình liên quan, thực nghiệm, phương pháp đọc sau cùng.
+- **Trích dẫn:** theo kiểu IEEE, đánh số, đặt ở cuối chính slide đó. Không có slide References riêng.
+- **Hình:** tất cả phải do nhóm tự vẽ, không lấy Hình 1 và Hình 2 của bài.
+- **Lời văn:** viết lại bằng lời của nhóm, không dịch nguyên câu của bài.
+
+**Coi như xong khi:** có 6 slide nháp kèm notes, bảng tiền nhiệm đủ 3 cột ý chính, hạn chế, hệ quả, và mỗi đóng góp có dòng "trước đây chưa làm được gì".
 
 **Lưu ý khi viết test**
 - Test 2 và 3 cần có dung sai số thực, vì đổi thứ tự cộng sẽ không cho kết quả giống hệt từng bit.
