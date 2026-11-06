@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Bí mật
+.env
+*.key
+
+# Hướng dẫn riêng cho Claude Code, chỉ giữ trên máy
+CLAUDE.md
+
+# Theo dõi thực nghiệm
+wandb/
+
+# Dữ liệu và kết quả trung gian: tải lại bằng code hoặc lưu thành artifact
+data/
+outputs/
+*.pt
+*.pth
+*.npy
+*.npz
+
+# Không đưa code của tác giả vào repo
+verification/_official/
+
+# Script đo giờ lặp lại pipeline của tác giả, chỉ giữ trên máy (Docs/Instruction.md, mục 1)
+randumb_benchmark.py
+
+# Hệ điều hành và editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

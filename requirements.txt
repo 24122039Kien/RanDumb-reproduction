@@ -1,0 +1,15 @@
+# Chưa ghim phiên bản: chốt theo phiên bản Python và torch trên Kaggle ở Sprint 0.
+# Nhóm thư viện chuẩn của môn
+numpy
+scipy
+scikit-learn
+torch
+
+# Ngoài nhóm chuẩn, phải giải thích lý do trong README
+wandb        # theo dõi thực nghiệm, môn yêu cầu
+datasets     # tải dữ liệu từ Hugging Face bằng code
+timm         # mô hình ViT-B/16 pre-trained cho Benchmark F
+psutil       # đo RAM đỉnh khi đo giờ
+
+# Kiểm thử
+pytest
