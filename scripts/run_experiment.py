@@ -63,7 +63,10 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--dtype", choices=sorted(DTYPES), default="float64", help="kiểu số của thống kê và phép giải")
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--batch-size", type=int, default=512)
-    parser.add_argument("--cache-dir", default="data/cache", help="nơi lưu ảnh đã giải mã")
+    parser.add_argument("--cache-dir", default=None, help="nơi lưu ảnh đã giải mã, mặc định <repo>/data/cache")
+    parser.add_argument("--hf-cache-dir", default=None, help="nơi lưu file tải từ HF, mặc định <repo>/data/hf")
+    parser.add_argument("--cache", action=argparse.BooleanOptionalAction, default=True,
+                        help="--no-cache để không đọc/ghi file .npz")
     parser.add_argument("--save-stats", default=None, help="lưu A, tong, dem ra file .pt để E5 dùng lại")
     parser.add_argument("--group", required=True, help="nhóm thực nghiệm, ví dụ E1")
     parser.add_argument("--tag", action="append", default=[], help="thẻ W&B, lặp lại được")
@@ -109,13 +112,14 @@ def main(argv=None) -> dict:
     set_seed(args.seed)
     spec = get_spec(args.dataset)
 
-    train_images, train_labels = load_images(args.dataset, "train", args.cache_dir)
+    load_kwargs = {"cache_dir": args.cache_dir, "hf_cache_dir": args.hf_cache_dir, "use_cache": args.cache}
+    train_images, train_labels = load_images(args.dataset, "train", **load_kwargs)
     if args.eval_split == "val":
         (train_images, train_labels), (eval_images, eval_labels) = train_val_split(
             train_images, train_labels, args.val_fraction, args.seed
         )
     else:
-        eval_images, eval_labels = load_images(args.dataset, "test", args.cache_dir)
+        eval_images, eval_labels = load_images(args.dataset, "test", **load_kwargs)
     train_images, train_labels = random_subset(train_images, train_labels, args.max_train, args.seed)
     eval_images, eval_labels = random_subset(eval_images, eval_labels, args.max_eval, args.seed)
 

@@ -1,6 +1,7 @@
 """Kiểm thử các tiện ích dữ liệu trên dữ liệu giả, không cần mạng."""
 import sys
 import types
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -117,32 +118,44 @@ def _install_fake_datasets(monkeypatch, n_rows, columns=("img", "label")):
 
     calls = []
 
-    def load_dataset(hf_id, split):
-        calls.append((hf_id, split))
+    def load_dataset(hf_id, split, cache_dir=None):
+        calls.append((hf_id, split, cache_dir))
         return FakeDataset()
 
     monkeypatch.setitem(sys.modules, "datasets", types.SimpleNamespace(load_dataset=load_dataset))
     return calls
 
 
+def test_data_dir_defaults_to_repo_and_can_be_overridden(monkeypatch, tmp_path):
+    monkeypatch.delenv("RANDUMB_DATA_DIR", raising=False)
+    assert data.data_dir() == Path(data.__file__).resolve().parents[2] / "data"
+    monkeypatch.setenv("RANDUMB_DATA_DIR", str(tmp_path))
+    assert data.data_dir() == tmp_path
+
+
 def test_load_images_checks_counts_and_uses_cache(monkeypatch, tmp_path):
+    monkeypatch.setenv("RANDUMB_DATA_DIR", str(tmp_path))
     spec = DatasetSpec("fake/ds", 6, 3, 2, True, image_column="img", test_split="valid")
     monkeypatch.setitem(data.DATASETS, "fake", spec)
 
     calls = _install_fake_datasets(monkeypatch, n_rows=3)
-    images, labels = load_images("fake", "test", cache_dir=tmp_path)
+    images, labels = load_images("fake", "test")
     assert images.shape == (3, 4, 4, 3) and images.dtype == torch.uint8
     assert labels.tolist() == [0, 1, 0]
-    assert calls == [("fake/ds", "valid")]
+    assert calls == [("fake/ds", "valid", str(tmp_path / "hf"))]
+    assert (tmp_path / "cache" / "fake-test.npz").exists()
 
-    load_images("fake", "test", cache_dir=tmp_path)  # lần hai đọc từ cache
+    load_images("fake", "test")  # lần hai đọc từ cache
     assert len(calls) == 1
+    load_images("fake", "test", use_cache=False)  # bỏ qua cache thì tải lại
+    assert len(calls) == 2
 
     with pytest.raises(AssertionError):
         load_images("fake", "train")  # có 3 mẫu, mong đợi 6
 
 
-def test_load_images_reports_missing_column(monkeypatch):
+def test_load_images_reports_missing_column(monkeypatch, tmp_path):
+    monkeypatch.setenv("RANDUMB_DATA_DIR", str(tmp_path))
     monkeypatch.setitem(data.DATASETS, "fake", DatasetSpec("fake/ds", 3, 3, 2, True))
     _install_fake_datasets(monkeypatch, n_rows=3, columns=("img", "label"))
     with pytest.raises(AssertionError, match="image"):

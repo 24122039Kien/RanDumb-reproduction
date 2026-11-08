@@ -11,6 +11,7 @@ Quy ước dữ liệu trong module này:
 """
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterator, Optional, Union
@@ -68,6 +69,20 @@ DATASETS = {
 }
 
 
+def data_dir() -> Path:
+    """Thư mục dữ liệu của project.
+
+    Mặc định là ``<repo>/data``, không phụ thuộc thư mục đang đứng khi chạy lệnh.
+    Đặt biến môi trường ``RANDUMB_DATA_DIR`` để đổi sang chỗ khác, ví dụ
+    ``/kaggle/working/data`` trên Kaggle.
+
+    Returns:
+        Đường dẫn thư mục dữ liệu.
+    """
+    override = os.environ.get("RANDUMB_DATA_DIR")
+    return Path(override) if override else Path(__file__).resolve().parents[2] / "data"
+
+
 def get_spec(name: str) -> DatasetSpec:
     """Lấy ``DatasetSpec`` theo tên, báo lỗi rõ ràng nếu tên sai.
 
@@ -113,17 +128,23 @@ def load_images(
     name: str,
     split: str,
     cache_dir: Optional[Union[str, Path]] = None,
+    hf_cache_dir: Optional[Union[str, Path]] = None,
+    use_cache: bool = True,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Tải một split từ Hugging Face và kiểm tra số mẫu, tên cột, số lớp.
 
-    Lần đầu tải sẽ giải mã toàn bộ ảnh; nếu có ``cache_dir`` thì lưu ra file ``.npz``
-    để các lần sau đọc lại nhanh.
+    Lần đầu tải sẽ giải mã toàn bộ ảnh rồi lưu ra file ``.npz`` để các lần sau đọc
+    lại nhanh. Mặc định mọi thứ nằm trong ``data_dir()``: file gốc tải về ở
+    ``data/hf``, ảnh đã giải mã ở ``data/cache``.
 
     Args:
         name: Khóa trong ``DATASETS``.
         split: ``"train"`` hoặc ``"test"``. ``"test"`` được ánh xạ sang
             ``DatasetSpec.test_split``.
-        cache_dir: Thư mục lưu cache, ``None`` nếu không cache.
+        cache_dir: Thư mục lưu file ``.npz``, ``None`` để dùng ``data_dir() / "cache"``.
+        hf_cache_dir: Thư mục lưu file gốc của Hugging Face, ``None`` để dùng
+            ``data_dir() / "hf"``.
+        use_cache: ``False`` để không đọc và không ghi file ``.npz``.
 
     Returns:
         Cặp ``(images, labels)``: ``uint8`` ``(N, H, W, C)`` và ``int64`` ``(N,)``.
@@ -137,7 +158,9 @@ def load_images(
     spec = get_spec(name)
     expected = spec.num_train if split == "train" else spec.num_test
 
-    cache_file = Path(cache_dir) / f"{name}-{split}.npz" if cache_dir is not None else None
+    cache_file = None
+    if use_cache:
+        cache_file = Path(cache_dir or data_dir() / "cache") / f"{name}-{split}.npz"
     if cache_file is not None and cache_file.exists():
         with np.load(cache_file) as cached:
             images, labels = cached["images"], cached["labels"]
@@ -145,7 +168,8 @@ def load_images(
         from datasets import load_dataset
 
         hf_split = spec.test_split if split == "test" else "train"
-        dataset = load_dataset(spec.hf_id, split=hf_split)
+        hf_dir = Path(hf_cache_dir or data_dir() / "hf")
+        dataset = load_dataset(spec.hf_id, split=hf_split, cache_dir=str(hf_dir))
         for column in (spec.image_column, spec.label_column):
             assert column in dataset.column_names, (
                 f"{spec.hf_id}: không có cột '{column}', các cột hiện có: {dataset.column_names}"
