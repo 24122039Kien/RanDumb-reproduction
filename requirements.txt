@@ -10,6 +10,7 @@ wandb        # theo dõi thực nghiệm, môn yêu cầu
 datasets     # tải dữ liệu từ Hugging Face bằng code
 timm         # mô hình ViT-B/16 pre-trained cho Benchmark F
 psutil       # đo RAM đỉnh khi đo giờ
+pillow       # giải mã, đổi kênh và thu nhỏ ảnh trong data.py
 
 # Kiểm thử
 pytest
