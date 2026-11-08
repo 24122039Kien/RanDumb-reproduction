@@ -62,6 +62,7 @@ Nhóm dự kiến chọn **Core scope** (chưa chốt). Chi tiết từng bướ
 | [notebooks/](notebooks/) | Notebook Kaggle cho từng thực nghiệm |
 | [tests/](tests/) | Kiểm thử bắt buộc trước khi chạy thực nghiệm |
 | [verification/](verification/) | Script kiểm chứng với code gốc, không chứa code gốc |
+| [data/](data/) | Nơi lưu dữ liệu tải về và cache khi chạy; nội dung không được commit |
 
 Các hàm trong `src/randumb/` hiện mới có chữ ký và docstring; phần cài đặt làm ở Sprint 1.
 
