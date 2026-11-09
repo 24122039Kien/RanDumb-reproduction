@@ -5,7 +5,7 @@ Term project của môn **Nhập môn Học máy (Introduction to Machine Learni
 > **Trạng thái:** Đang ở giai đoạn chuẩn bị. Repo chưa có phần cài đặt phương pháp và chưa có kết quả thực nghiệm nào.
 
 **Thành viên:** *(điền tên và MSSV)*
-**W&B project:** *(điền link public)*
+**W&B project:** [randumb-reproduction-24TNT](https://forge.coreweave.com/wandb/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT) (public)
 
 ## Bài báo
 

@@ -2,7 +2,7 @@
 
 **Người làm:** Kiên
 **Ngày:** 06/11/2026
-**Bối cảnh:** W&B project `randumb-repro` đã ở chế độ Public. Sprint 0 đang trễ 1 ngày: còn kiểm tra project, mời thành viên và chạy notebook Kaggle.
+**Bối cảnh:** W&B project [`randumb-reproduction-24TNT`](https://forge.coreweave.com/wandb/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT) đã ở chế độ Public. Sprint 0 đang trễ 1 ngày: còn kiểm tra project, mời thành viên và chạy notebook Kaggle.
 
 Làm theo thứ tự. Mỗi bước xong thì đánh dấu trong [implementation_plan.md](implementation_plan.md).
 
@@ -10,14 +10,14 @@ Làm theo thứ tự. Mỗi bước xong thì đánh dấu trong [implementation
 
 ## 1. Kiểm tra project W&B (5 phút)
 
-- [ ] **Mở bằng cửa sổ ẩn danh:** dán link project vào cửa sổ ẩn danh. Phải xem được khi chưa đăng nhập.
+- [x] **Mở bằng cửa sổ ẩn danh:** đã xem được khi chưa đăng nhập (09/11).
 - [ ] **Mời Đăng và Huy vào team:** vào **Team → Settings → Members**, mời bằng email.
-- [ ] **Lấy tên entity:** chính là tên team trong link project, dạng `wandb.ai/<entity>/randumb-repro`. Copy từ link, vì tên team trên màn hình bị cắt ngắn.
+- [x] **Tên entity:** `24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm`, project `randumb-reproduction-24TNT`. Đã điền sẵn trong `src/randumb/tracking.py` và ô 1 của notebook.
 - [ ] **Hoàn tất đơn Academic:** bấm **Complete application** ở góc trái dưới. Bản dùng thử hết hạn khoảng 05/12, trùng hạn nộp poster.
 
 ## 2. Chuẩn bị Kaggle (10 phút)
 
-- [ ] **Lấy API key W&B:** vào [wandb.ai/authorize](https://wandb.ai/authorize) và copy key.
+- [ ] **Lấy API key W&B:** trong cửa sổ đã đăng nhập, mở trang project và bấm **Generate** ở mục "Generate your API key", hoặc vào [wandb.ai/authorize](https://wandb.ai/authorize).
 - [ ] **Xác minh số điện thoại trên Kaggle:** cần có bước này mới bật được Internet.
 - [ ] **Import notebook:** vào **Create → New Notebook → File → Import Notebook**, tải lên `notebooks/00_kaggle_smoke.ipynb` (có trong repo trên GitHub).
 - [ ] **Chỉnh Settings:** Accelerator chọn **GPU T4 x2**, Internet chọn **On**.
@@ -25,7 +25,7 @@ Làm theo thứ tự. Mỗi bước xong thì đánh dấu trong [implementation
 
 ## 3. Chạy notebook (khoảng 10-15 phút, chưa đo thật)
 
-- [ ] **Sửa ô 1:** đổi `WANDB_ENTITY = "TEN-TEAM-WANDB"` thành tên entity ở bước 1.
+- [ ] **Kiểm tra ô 1:** `WANDB_ENTITY` và `WANDB_PROJECT` đã điền sẵn, không cần sửa.
 - [ ] **Chạy toàn bộ:** chọn **Run All**.
 - [ ] **Kiểm tra run:** mở link run ở ô 9 bằng cửa sổ ẩn danh.
 
