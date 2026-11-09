@@ -57,3 +57,14 @@ def test_init_run_passes_config_and_disabled_mode(monkeypatch):
     assert captured["entity"] == "team-x" and captured["mode"] == "disabled"
     assert captured["config"]["dim"] == 10 and "python" in captured["config"]
     assert captured["tags"] == ["lab:reproduction"]
+
+
+def test_init_run_defaults_to_team_project(monkeypatch):
+    captured = {}
+    monkeypatch.setitem(sys.modules, "wandb", types.SimpleNamespace(init=lambda **kw: captured.update(kw)))
+    monkeypatch.delenv("WANDB_ENTITY", raising=False)
+
+    init_run("E1-test", "E1", [], {}, enabled=False)
+
+    assert captured["entity"] == "24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm"
+    assert captured["project"] == "randumb-reproduction-24TNT"

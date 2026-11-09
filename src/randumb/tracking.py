@@ -15,7 +15,8 @@ from typing import Any, Iterable, Optional
 import numpy as np
 import torch
 
-WANDB_PROJECT = "randumb-repro"
+WANDB_ENTITY = "24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm"
+WANDB_PROJECT = "randumb-reproduction-24TNT"
 TRACKED_PACKAGES = ("numpy", "scipy", "scikit-learn", "torch", "wandb", "datasets", "timm")
 
 
@@ -73,7 +74,8 @@ def init_run(
         tags: Các thẻ, ví dụ ``lab:reproduction``.
         config: Cấu hình đầy đủ của run.
         project: Tên W&B project.
-        entity: Tên team W&B; ``None`` thì lấy từ biến môi trường ``WANDB_ENTITY``.
+        entity: Tên team W&B; ``None`` thì lấy từ biến môi trường ``WANDB_ENTITY``,
+            nếu không có thì dùng team của nhóm.
         enabled: ``False`` để không gửi gì lên W&B.
 
     Returns:
@@ -83,7 +85,7 @@ def init_run(
 
     return wandb.init(
         project=project,
-        entity=entity or os.environ.get("WANDB_ENTITY"),
+        entity=entity or os.environ.get("WANDB_ENTITY") or WANDB_ENTITY,
         name=name,
         group=group,
         tags=list(tags),
