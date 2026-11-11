@@ -80,10 +80,10 @@ Tài liệu này chỉ nói ai làm gì và khi nào. Công thức, cấu hình 
 - [ ] Clone repo và commit lần đầu bằng tài khoản của mình.
 
 **Kiên**
-- [ ] Tạo W&B project public, kiểm tra mở được khi chưa đăng nhập.
-- [ ] Tạo notebook Kaggle với GPU T4 x2, Internet On; lưu `WANDB_API_KEY` vào Secrets. Notebook mẫu: `notebooks/00_kaggle_smoke.ipynb`.
-- [ ] Ghi lại phiên bản Python và torch trên Kaggle để ghim `requirements.txt`.
-- [ ] Log một run thử với thẻ `smoke`.
+- [x] Tạo W&B project public, kiểm tra mở được khi chưa đăng nhập. Project: `randumb-reproduction-24TNT` (09/11).
+- [x] Tạo notebook Kaggle với GPU T4 x2, Internet On; lưu `WANDB_API_KEY` vào Secrets. Notebook mẫu: `notebooks/00_kaggle_smoke.ipynb` (11/11).
+- [x] Ghi lại phiên bản Python và torch trên Kaggle để ghim `requirements.txt`: Python 3.13, torch 2.11.0+cu130 (11/11).
+- [x] Log một run thử với thẻ `smoke`: run `6vddfz6r` (11/11). Kết quả xem [report2.md](report2.md).
 
 **Huy**
 - [ ] Tải bản PDF NeurIPS và đối chiếu các số "paper" trong Instruction.md.

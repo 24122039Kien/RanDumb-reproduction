@@ -17,16 +17,16 @@ Làm theo thứ tự. Mỗi bước xong thì đánh dấu trong [implementation
 
 ## 2. Chuẩn bị Kaggle (10 phút)
 
-- [ ] **Lấy API key W&B:** trong cửa sổ đã đăng nhập, mở trang project và bấm **Generate** ở mục "Generate your API key", hoặc vào [wandb.ai/authorize](https://wandb.ai/authorize).
-- [ ] **Xác minh số điện thoại trên Kaggle:** cần có bước này mới bật được Internet.
-- [ ] **Import notebook:** vào **Create → New Notebook → File → Import Notebook**, tải lên `notebooks/00_kaggle_smoke.ipynb` (có trong repo trên GitHub).
-- [ ] **Chỉnh Settings:** Accelerator chọn **GPU T4 x2**, Internet chọn **On**.
-- [ ] **Thêm Secret:** vào **Add-ons → Secrets**, thêm `WANDB_API_KEY` và bật cho notebook này. Không dán key vào code.
+- [x] **Lấy API key W&B:** trong cửa sổ đã đăng nhập, mở trang project và bấm **Generate** ở mục "Generate your API key", hoặc vào [wandb.ai/authorize](https://wandb.ai/authorize).
+- [x] **Xác minh số điện thoại trên Kaggle:** cần có bước này mới bật được Internet.
+- [x] **Import notebook:** vào **Create → New Notebook → File → Import Notebook**, tải lên `notebooks/00_kaggle_smoke.ipynb` (có trong repo trên GitHub).
+- [x] **Chỉnh Settings:** Accelerator chọn **GPU T4 x2**, Internet chọn **On**. Lần chạy đầu quên bật GPU nên ô 2 báo lỗi `nvidia-smi`.
+- [x] **Thêm Secret:** vào **Add-ons → Secrets**, thêm `WANDB_API_KEY` và bật cho notebook này. Không dán key vào code.
 
 ## 3. Chạy notebook (khoảng 10-15 phút, chưa đo thật)
 
-- [ ] **Kiểm tra ô 1:** `WANDB_ENTITY` và `WANDB_PROJECT` đã điền sẵn, không cần sửa.
-- [ ] **Chạy toàn bộ:** chọn **Run All**.
+- [x] **Kiểm tra ô 1:** `WANDB_ENTITY` và `WANDB_PROJECT` đã điền sẵn, không cần sửa.
+- [x] **Chạy toàn bộ:** chọn **Run All** (11/11). Kết quả xem [report2.md](report2.md).
 - [ ] **Kiểm tra run:** mở link run ở ô 9 bằng cửa sổ ẩn danh.
 
 Notebook này chưa từng chạy trên Kaggle. Nếu ô nào báo lỗi, copy thông báo lỗi gửi Claude.
@@ -45,10 +45,10 @@ Gửi 3 thứ sau để Claude cập nhật repo và push:
 
 Phụ trách dữ liệu và hạ tầng chạy:
 
-1. Viết `data.py` để tải 5 dataset, có `assert` kiểm tra số mẫu.
-2. Viết `tracking.py`.
-3. Lập bảng dữ liệu cho E2.
-4. Ngày 08/11: viết `run_experiment.py` và ghép pipeline với Đăng.
+1. [x] Viết `data.py` để tải 5 dataset, có `assert` kiểm tra số mẫu.
+2. [x] Viết `tracking.py`.
+3. [x] Lập bảng dữ liệu cho E2: [e2_datasets.md](e2_datasets.md).
+4. [ ] Ngày 08/11: viết `run_experiment.py` và ghép pipeline với Đăng. Script đã viết trên nhánh `feat/kien/data-pipeline`; còn chờ merge phần lõi của Đăng vào `main`.
 
 Bảng ở ô 7 là đầu vào trực tiếp cho `data.py`, nên chạy xong notebook là bắt tay vào được ngay.
 
