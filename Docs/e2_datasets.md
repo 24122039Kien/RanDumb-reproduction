@@ -8,7 +8,7 @@
 
 ## 1. E1: đã kiểm chứng, khác với Instruction.md ở 3 điểm
 
-Năm dataset đều đã có trong `src/randumb/data.py`. MNIST và CIFAR-10 đã chạy thật trên laptop ở D = 1.000.
+Năm dataset đều đã có trong `src/randumb/data.py`. MNIST và CIFAR-10 đã chạy thật trên laptop ở D = 1.000. Ngày 11/11, ô 7 của notebook Kaggle (W&B run `6vddfz6r`) xác nhận lại cả 5 dataset có đúng tên cột và số mẫu như bảng dưới, kể cả khi gọi tên cũ `Maysee/tiny-imagenet` (Hugging Face tự chuyển hướng).
 
 | Dataset | Nguồn HF | Cột ảnh / nhãn | Split train / test | Ghi chú |
 |---|---|---|---|---|
