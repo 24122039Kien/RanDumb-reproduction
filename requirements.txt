@@ -1,16 +1,19 @@
-# Chưa ghim phiên bản: chốt theo phiên bản Python và torch trên Kaggle ở Sprint 0.
+# Phiên bản ghim theo môi trường Kaggle (GPU T4, Python 3.13), đo ngày 11/11/2026
+# bằng notebooks/00_kaggle_smoke.ipynb, W&B run 6vddfz6r.
+# Trên Kaggle, torch có hậu tố +cu130; pip cài torch==2.11.0 là bản tương ứng.
+
 # Nhóm thư viện chuẩn của môn
-numpy
-scipy
-scikit-learn
-torch
+numpy==2.1.3
+scipy==1.16.3
+scikit-learn==1.6.1
+torch==2.11.0
 
 # Ngoài nhóm chuẩn, phải giải thích lý do trong README
-wandb        # theo dõi thực nghiệm, môn yêu cầu
-datasets     # tải dữ liệu từ Hugging Face bằng code
-timm         # mô hình ViT-B/16 pre-trained cho Benchmark F
-psutil       # đo RAM đỉnh khi đo giờ
-pillow       # giải mã, đổi kênh và thu nhỏ ảnh trong data.py
+wandb==0.28.1      # theo dõi thực nghiệm, môn yêu cầu
+datasets==4.8.5    # tải dữ liệu từ Hugging Face bằng code
+timm==1.0.30       # mô hình ViT-B/16 pre-trained cho Benchmark F
+psutil==5.9.5      # đo RAM đỉnh khi đo giờ
+pillow             # giải mã, đổi kênh và thu nhỏ ảnh trong data.py; chưa đo phiên bản trên Kaggle
 
 # Kiểm thử
-pytest
+pytest==8.4.2
