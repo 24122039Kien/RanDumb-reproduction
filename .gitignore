@@ -18,7 +18,8 @@ CLAUDE.md
 wandb/
 
 # Dữ liệu và kết quả trung gian: tải lại bằng code hoặc lưu thành artifact
-data/
+data/*
+!data/README.md
 outputs/
 *.pt
 *.pth

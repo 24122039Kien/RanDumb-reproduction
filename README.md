@@ -5,7 +5,7 @@ Term project của môn **Nhập môn Học máy (Introduction to Machine Learni
 > **Trạng thái:** Đang ở giai đoạn chuẩn bị. Repo chưa có phần cài đặt phương pháp và chưa có kết quả thực nghiệm nào.
 
 **Thành viên:** *(điền tên và MSSV)*
-**W&B project:** *(điền link public)*
+**W&B project:** [randumb-reproduction-24TNT](https://forge.coreweave.com/wandb/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT) (public)
 
 ## Bài báo
 
@@ -62,8 +62,9 @@ Nhóm dự kiến chọn **Core scope** (chưa chốt). Chi tiết từng bướ
 | [notebooks/](notebooks/) | Notebook Kaggle cho từng thực nghiệm |
 | [tests/](tests/) | Kiểm thử bắt buộc trước khi chạy thực nghiệm |
 | [verification/](verification/) | Script kiểm chứng với code gốc, không chứa code gốc |
+| [data/](data/) | Nơi lưu dữ liệu tải về và cache khi chạy; nội dung không được commit |
 
-Các hàm trong `src/randumb/` hiện mới có chữ ký và docstring; phần cài đặt làm ở Sprint 1.
+Trạng thái `src/randumb/`: `data.py`, `tracking.py`, `pipeline.py` đã cài trên nhánh `feat/kien/data-pipeline`; `features.py`, `stats.py`, `classifier.py` đã cài trên nhánh của Đăng. Cả hai đang chờ merge vào `main`.
 
 ## Cài đặt và chạy
 
@@ -71,11 +72,11 @@ Các hàm trong `src/randumb/` hiện mới có chữ ký và docstring; phần 
 
 ## Bảng kết quả
 
-*Chưa có run nào.* Mỗi thực nghiệm sẽ có một dòng theo mẫu:
+Mỗi thực nghiệm có một dòng. Chưa có run thực nghiệm nào; dòng dưới là run kiểm tra môi trường.
 
 | Thực nghiệm | Notebook/script | W&B run | Kết quả cho thấy |
 |---|---|---|---|
-| *(ví dụ: E1, CIFAR-100)* | | | |
+| Kiểm tra môi trường Kaggle (Sprint 0) | [notebooks/00_kaggle_smoke.ipynb](notebooks/00_kaggle_smoke.ipynb) | [6vddfz6r](https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/6vddfz6r) | Trên T4, nhân ma trận `float64` chậm hơn `float32` khoảng 14 lần; 5 dataset E1 đọc được từ Hugging Face |
 
 ## Tính toàn vẹn học thuật
 
