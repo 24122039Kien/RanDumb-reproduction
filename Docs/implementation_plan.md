@@ -16,6 +16,8 @@ Tài liệu này chỉ nói ai làm gì và khi nào. Công thức, cấu hình 
 
 ## 0. Lịch cập nhật 14/11: từ giờ đến hạn deck
 
+> **Cập nhật của Đăng cho Sprint 3 (14/11):** Đăng đã xác nhận **γ=1.0 + L2**, giữ D=25.000 và λ E1 đúng paper. L2 là lựa chọn của nhóm vì paper không nêu rõ chuẩn hóa. Đã chuẩn bị sửa bộ nhớ/OAS, OAS theo lớp, λ tương đối, suite 15 E1 + 24 E8-B và notebook trên nhánh `dang/sprint-3-experiments`; 69 tests qua. **Chưa có run thật; đang chờ môi trường Kaggle/W&B.** Xem [hướng dẫn Sprint 3](sprint3_Dang.md) và [nhật ký Đăng](../nhatky_Dang.md). Các đề xuất đổi γ hoặc giảm D bên dưới là lịch sử, không áp dụng cho E1 đã chốt.
+
 **Lịch này thay cho Sprint 2-4 bên dưới.** Ngày 14/11, code của cả ba người đã nằm trên `main` (37 test qua), nhưng chưa có run thực nghiệm nào. Nhóm trễ khoảng một sprint. Các mục Sprint 2-4 cũ được giữ lại để tham khảo nội dung từng việc.
 
 ### Tình hình ngày 14/11

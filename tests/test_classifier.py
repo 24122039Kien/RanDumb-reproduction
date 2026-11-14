@@ -128,3 +128,35 @@ def test_full_pipeline_smoke():
 
     assert preds.shape == (N_test,), f"Shape dự đoán sai: {preds.shape}"
     assert preds.min() >= 0 and preds.max() < C, "Nhãn dự đoán ngoài phạm vi"
+
+
+@pytest.mark.parametrize("scale", [1.0, 1e-10, 1e10])
+def test_oas_scale_invariance_and_sklearn_reference(scale):
+    g = torch.Generator().manual_seed(87)
+    x = torch.randn(150, 5, generator=g, dtype=torch.float64) * torch.arange(1, 6)
+    x = x * math.sqrt(scale)
+    centered = x - x.mean(0)
+    cov = centered.T @ centered / len(x)
+    untouched = cov.clone()
+    actual, rho = oas_shrink(cov, len(x))
+    ref = OAS(store_precision=False).fit(x.numpy())
+    assert rho == pytest.approx(ref.shrinkage_, rel=1e-10)
+    torch.testing.assert_close(actual / scale, torch.from_numpy(ref.covariance_) / scale)
+    assert torch.equal(cov, untouched)
+    inplace, inplace_rho = oas_shrink(cov, len(x), inplace=True)
+    assert inplace.data_ptr() == cov.data_ptr()
+    assert inplace_rho == rho
+    torch.testing.assert_close(inplace, actual)
+
+
+def test_zero_covariance_and_inplace_ridge():
+    cov = torch.zeros(4, 4, dtype=torch.float64)
+    shrunk, rho = oas_shrink(cov, 10)
+    assert rho == 1.0
+    assert torch.equal(shrunk, cov)
+    means = torch.ones(2, 4, dtype=torch.float64)
+    expected = fit_lda(means, cov, 0.1)
+    assert not cov.any()
+    actual = fit_lda(means, cov, 0.1, inplace=True)
+    torch.testing.assert_close(actual, expected)
+    torch.testing.assert_close(cov, 0.1 * torch.eye(4, dtype=torch.float64))

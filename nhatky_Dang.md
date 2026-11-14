@@ -2,7 +2,7 @@
 
 > Tài liệu này ghi lại những gì đã làm, quyết định thiết kế và điều cần lưu ý.
 > Cập nhật theo từng sprint.
-> Cập nhật mới nhất: **14/11/2026**, xem mục **Sprint 2 — Bước 1** cuối file.
+> Cập nhật mới nhất: **14/11/2026**, xem mục **Sprint 3** cuối file.
 > Những quyết định trong mục mới nhất thay thế các lựa chọn tạm ở nhật ký cũ.
 
 ---
@@ -216,3 +216,63 @@ Chạy toàn bộ tests bằng Python 3.11 đã có thư viện (lệnh `python`
 Kết quả: **37 passed, 1 warning in 12.30s**. Warning đến từ plugin `anyio` sử dụng API pytest sẽ bị bỏ ở phiên bản sau; không có test thất bại. Đây là kiểm thử code/cấu hình trên dữ liệu giả, không phải số liệu tái lập paper.
 
 **Điểm dừng:** đã hoàn thành đúng một bước tiếp theo — chốt và áp dụng cấu hình. Công việc sau cần xử lý điều kiện bộ nhớ và đo thực tế trước các run lớn; E8/E1 vẫn chưa thực hiện trong phiên này.
+
+---
+
+## Sprint 3 — E1 và E8 pha B (14/11/2026, đang thực hiện)
+
+**Phạm vi mới do Đăng yêu cầu:** chỉ Sprint 3 của Đăng; thay thế yêu cầu trước đó làm toàn bộ các sprint. Bao gồm E1 trên 5 dataset × 3 seed và E8 pha B về shrink/λ. Các sửa lỗi và tối ưu bộ nhớ cần để chạy đúng các thực nghiệm này là phần chuẩn bị; không tính là đã hoàn thành run.
+
+### Đồng bộ và quyết định đã được xác nhận
+
+- Đã `fetch` GitHub và cập nhật bản làm việc từ `main` mới nhất, commit **`b57e437`**, có `Docs/report3.md` và code E2 của Kiên. Dùng repo hiện có, không tạo thêm bản clone trùng.
+- Nhánh thực hiện: **`dang/sprint-3-experiments`**, tạo từ `main` mới nhất.
+- **Đăng đã chọn phương án 1: γ = 1.0 + chuẩn hóa L2 cho E1**, và yêu cầu ghi rõ vào nhật ký. Quyết định này thay thế lựa chọn z-score tạm của Sprint 2. D = 25.000 và λ theo dataset tiếp tục giữ đúng paper; không chuyển γ sang `scale` như đề xuất của Kiên.
+- **Giới hạn:** paper chỉ ghi normalize, không xác nhận dùng L2. L2 là lựa chọn được Đăng chốt, có động cơ từ thử nghiệm sơ bộ của Kiên; không gọi đó là thông số tác giả đã công bố. Các số 9,82%/45,51% trong báo cáo Kiên chưa có W&B, chưa dùng làm kết quả E1/E8 của Đăng.
+- Giữ RFF, thống kê và phép giải `float64`; seed nhóm `0,1,2`; flip theo paper. Phần tiền xử lý vẫn tạo tensor `float32` như đã ghi ở Sprint 2.
+- Trước lần xác nhận lại yêu cầu, thao tác cập nhật/tạo nhánh từng bị từ chối ở hộp quyền. Sau khi Đăng yêu cầu lại làm Sprint 3, thao tác cập nhật và tạo nhánh mới đã được cho phép và hoàn tất.
+
+### Môi trường thực nghiệm còn cần
+
+Máy hiện tại có RTX 3050 6 GB và RAM 11,71 GiB; chưa có credential Kaggle/W&B cho script. Đã hỏi Đăng về notebook Kaggle có GPU và Secret `WANDB_API_KEY` hoặc host khác đủ tài nguyên. Chưa nhận thông tin này nên chưa chạy full E1/E8, chưa phát sinh run hay số liệu W&B. Không lưu hoặc yêu cầu ghi khóa vào source/chat.
+
+### Phát hiện khi kiểm tra phần lõi
+
+Kiểm tra dữ liệu giả trên covariance `diag(1,2,4)`, n=100: OAS hiện tại cho `rho=0.14851485148514856`, nhưng khi nhân covariance với `1e-10` lại cho `rho=1.0`. Theo công thức OAS, hệ số co phải không đổi khi nhân toàn bộ covariance với một hằng dương. Nguyên nhân là điều kiện tuyệt đối `abs(denominator) < 1e-15`; điều này có thể làm sai các covariance nhỏ. Đây là lỗi được tái hiện trên dữ liệu giả, chưa phải đo tác động lên accuracy dữ liệu thật.
+
+**Trạng thái run lúc bắt đầu:** E1 0/15 hoàn tất; E8 pha B chưa chạy. Các mục dưới sẽ cập nhật theo kết quả thực tế.
+
+### Các việc đã làm để chuẩn bị chạy Sprint 3
+
+1. **Áp dụng quyết định γ=1.0 + L2:** đổi chuẩn hóa mặc định của `scripts/run_experiment.py` sang `l2`. D và λ E1 giữ như Sprint 2. Các lệnh z-score trong phần nhật ký Sprint 2 chỉ là lịch sử, được thay bằng cấu hình L2 hiện tại.
+2. **Sửa OAS:** bỏ ngưỡng tuyệt đối `1e-15`; viết công thức theo tỉ số `mu²/alpha` để hệ số co không bị ép thành 1 chỉ vì covariance có thang nhỏ. Tính Frobenius norm bằng reduction, không tạo `cov**2` kích thước D×D. Test đối chiếu cả covariance và ρ với `sklearn.OAS` ở ba thang 1, 1e-10, 1e10.
+3. **Giảm ma trận tạm:** tích lũy `A.addmm_`; `finalize(consume=True)` dùng lại A làm covariance, hiệu chỉnh trung bình bằng addmm tại chỗ; OAS và ridge sửa trực tiếp covariance khi pipeline cho phép. Giải phóng covariance sau giải hệ. API mặc định của các hàm vẫn giữ đầu vào để tương thích với người gọi khác. Sau consume, update/finalize/save bị từ chối để tránh tái sử dụng nhầm thống kê.
+4. **Cài OAS theo lớp cho E8-B:** mỗi lớp một thống kê tạm, co covariance rồi gộp theo số mẫu (gồm ảnh flip). Không giữ C ma trận covariance. Giữ trung bình lớp riêng và log `rho_per_class`; không giả vờ tồn tại một ρ duy nhất cho cả phép gộp này. Test đối chiếu với các OAS sklearn riêng trên hai lớp có kích thước/phương sai khác nhau.
+5. **Cài λ tương đối:** `--lam-mode relative --lam alpha` dùng `lambda_effective = alpha * trace(S)/D`. CLI yêu cầu alpha rõ ràng, không dùng nhầm λ paper làm alpha. Log mean variance và λ thực dùng. Test tính bất biến dự đoán khi đổi thang toàn bộ đặc trưng.
+6. **Lưu bằng chứng run:** `--output` ghi JSON qua file tạm rồi replace sau khi run hoàn tất; config có commit, trạng thái dirty và SHA256 source, dtype của RFF/thống kê, λ đầu vào và calibration URL. Lỗi pipeline đánh dấu W&B run thất bại. Không lưu credential vào bản ghi.
+7. **Bộ chạy `scripts/run_sprint3.py`:** E1 gồm 15 run; E8-B gồm 24 run theo thiết kế bên dưới. Mỗi run một subprocess; chạy tuần tự. Mặc định chỉ in kế hoạch; `--execute` mới chạy. Có bộ lọc dataset/seed để chia phiên. Resume chỉ nhận JSON đúng source/cấu hình và có URL W&B; source hoặc cấu hình khác thì dừng, không ghi đè kết quả cũ.
+8. **Bảng tổng hợp:** xuất từng run vào `summary.csv`, chênh lệch điểm phần trăm và sai lệch tương đối. `e1_aggregate.csv` chỉ tính mean/sample std khi đủ seed 0,1,2; thiếu seed thì ghi incomplete. Giữ dữ liệu các phiên trước khi chạy thêm dataset/seed.
+9. **Notebook `notebooks/03_dang_sprint3.ipynb`:** clone nhánh Sprint 3, cài dependencies ghim, đọc Kaggle Secrets, chạy tests và kiểm tra memory ảnh giả D=25.000 trước khi chạy dữ liệu thật. Đã compile mọi ô code; chưa chạy notebook trên Kaggle.
+10. **Tài liệu:** thêm `Docs/sprint3_Dang.md` với cấu hình, lệnh chạy, thiết kế E8-B, cách chia phiên/resume và tiêu chí nghiệm thu. Ghi trạng thái chuẩn bị trong kế hoạch; chưa đánh dấu các run thật là xong.
+
+**Lưu ý flip:** code hiện duyệt batch ảnh gốc rồi batch ảnh flip riêng; batch 512 là tối đa 512 ảnh trong mỗi lần transform, không phải ghép 1.024 ảnh cùng lúc như mô tả tạm trong bảng Sprint 2. Tổng số mẫu tích lũy vẫn gấp đôi với dataset có flip.
+
+### Thiết kế E8-B được chốt cho Sprint 3
+
+- CIFAR-10 và CIFAR-100; D=5.000 và 25.000; ba chế độ `oas`, `oas_per_class`, `none`; hai quy tắc λ; seed 0: **24 run**. Đây là thiết kế của nhóm, không phải cấu hình mặc định paper; một seed chỉ cho phân tích thăm dò.
+- Fixed dùng λ=1e-5. Relative dùng α=1e-5/(trace(S_ref)/5.000), S_ref lấy từ **train** của run fixed D=5.000 tương ứng dataset/shrink. Giữ nguyên α khi đổi D lên 25.000. Không chọn alpha theo accuracy test.
+- Chạy relative ở D=5.000 để kiểm tra khớp mốc fixed; chạy D=25.000 để so hiệu ứng của quy tắc λ. Ghi calibration run vào config/JSON/W&B.
+- RFF ở các D không đảm bảo là các tập chiều lồng nhau dù cùng seed; không diễn giải khác biệt thành tác động thuần túy của riêng λ khi chưa xem cả yếu tố D.
+- E1 vẫn dùng γ=1.0, L2, D=25.000, OAS gộp, λ theo dataset, 3 seed; E8 không tự đổi cấu hình E1 sau khi xem test.
+
+### Kiểm chứng thực tế và giới hạn
+
+- Toàn bộ **69 tests passed, 1 warning in 8.49s** trên Python 3.11.6, torch 2.11.0+cu128. Warning là plugin anyio dùng API pytest sắp bỏ; không có test thất bại. Có kiểm tra tích hợp suite bằng subprocess giả để chứng minh chạy một lần rồi resume không chạy trùng; đây không phải thực nghiệm thật.
+- Đã đo pipeline thật với **ảnh giả**, GPU RTX 3050 6 GB, D=4.096, float64, batch 128, 256 ảnh train (512 mẫu gồm flip). OAS gộp: peak allocated **0,477631 GiB**, reserved **0,566406 GiB**. OAS theo lớp: allocated **0,477662 GiB**, reserved **0,568359 GiB**.
+- JSON gốc nằm ở `Docs/evidence/sprint3/memory-4096-oas.json` và `memory-4096-oas-per-class.json`, có phiên bản môi trường, thời gian, source SHA256. Phép đo được làm khi code chưa commit nên `git_dirty=true`; hash source ghi nhận đúng nội dung lúc đo.
+- Chưa đo D=25.000 trên T4; không suy ra T4 chắc chắn đủ VRAM từ phép đo D=4.096. Giới hạn còn lại gồm workspace Cholesky và dữ liệu thật. Notebook có bước kiểm tra D=25.000 riêng và dừng nếu lỗi.
+- **Chưa có kết quả E1 hoặc E8-B trên dữ liệu thật, chưa có URL W&B mới, chưa có bảng paper/team hoàn chỉnh.** Chưa chạy E8 pha A (ngoài phạm vi Sprint 3 lần này). Không dùng số giả để lấp bảng hoặc đánh dấu sprint đã xong.
+
+### Việc cần Đăng cung cấp để chạy tiếp
+
+Đã gửi câu hỏi xin **link notebook Kaggle có quyền chỉnh sửa, GPU T4 và Secret WANDB_API_KEY**, hoặc thông tin môi trường khác đủ tài nguyên. Chưa có câu trả lời ở thời điểm cập nhật này. Source/kiểm thử/notebook đã sẵn sàng cho bước chạy; trạng thái thực nghiệm vẫn là **E1 0/15, E8-B 0/24**.

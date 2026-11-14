@@ -27,6 +27,7 @@ for _stream in (sys.stdout, sys.stderr):
 
 from randumb.data import NORMALIZATIONS, channel_stats, get_spec, load_images, normalize, train_val_split  # noqa: E402
 from randumb.pipeline import FEATURES, PipelineConfig, fit_and_evaluate, resolve_gamma  # noqa: E402
+from randumb.provenance import code_version  # noqa: E402
 from randumb.tracking import init_run, peak_ram_gb, peak_vram_gb, relative_deviation, set_seed  # noqa: E402
 
 # Độ chính xác của RanDumb trong bài (Docs/Instruction.md, mục 4.3).
@@ -52,7 +53,8 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--gamma", default="1.0", help="mặc định 1.0 theo paper; 'scale' dành cho phân tích độ nhạy")
     parser.add_argument("--lam", type=float, default=None, help="hệ số ridge λ, mặc định theo dataset trong paper")
     parser.add_argument("--lam-mode", choices=["fixed", "relative"], default="fixed")
-    parser.add_argument("--norm", choices=NORMALIZATIONS, default="zscore")
+    parser.add_argument("--norm", choices=NORMALIZATIONS, default="l2",
+                        help="Đăng chốt L2 + gamma=1.0; paper không nêu rõ chuẩn hóa")
     parser.add_argument("--shrink", choices=["oas", "oas_per_class", "none"], default="oas")
     parser.add_argument("--flip", action=argparse.BooleanOptionalAction, default=None,
                         help="mặc định theo DatasetSpec.use_flip")
@@ -75,6 +77,8 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--group", required=True, help="nhóm thực nghiệm, ví dụ E1")
     parser.add_argument("--tag", action="append", default=[], help="thẻ W&B, lặp lại được")
     parser.add_argument("--name", default=None, help="tên run, mặc định <group>-<dataset>-D<dim>-seed<seed>")
+    parser.add_argument("--output", default=None, help="lưu cấu hình và kết quả run thành JSON")
+    parser.add_argument("--calibration-run", default=None, help="URL W&B tham chiếu để hiệu chỉnh alpha của E8")
     parser.add_argument("--entity", default=None, help="team W&B, mặc định lấy từ WANDB_ENTITY")
     parser.add_argument("--wandb", action=argparse.BooleanOptionalAction, default=True)
     return parser.parse_args(argv)
@@ -108,10 +112,8 @@ def main(argv=None) -> dict:
         Từ điển các chỉ số đã log.
     """
     args = parse_args(argv)
-    if args.shrink == "oas_per_class":
-        raise NotImplementedError("--shrink oas_per_class thuộc Sprint 2 (E8 pha B), chưa cài trong phần lõi")
-    if args.lam_mode == "relative":
-        raise NotImplementedError("--lam-mode relative thuộc Sprint 2 (E8 pha B), chưa cài trong phần lõi")
+    if args.lam_mode == "relative" and args.lam is None:
+        raise ValueError("--lam-mode relative cần --lam alpha rõ ràng; không dùng lambda paper làm alpha")
 
     set_seed(args.seed)
     spec = get_spec(args.dataset)
@@ -138,6 +140,7 @@ def main(argv=None) -> dict:
         dim=args.dim,
         gamma=resolve_gamma(args.gamma, train_x),
         lam=args.lam,
+        lam_mode=args.lam_mode,
         seed=args.seed,
         features=args.features,
         shrink=args.shrink,
@@ -148,7 +151,8 @@ def main(argv=None) -> dict:
         feature_dtype=DTYPES[args.feature_dtype],
     )
     config = {
-        **{k: v for k, v in vars(args).items() if k not in ("wandb", "entity")},
+        **code_version(),
+        **{k: v for k, v in vars(args).items() if k not in ("wandb", "entity", "output")},
         "gamma_value": cfg.gamma,
         "flip": cfg.flip,
         "hf_id": spec.hf_id,
@@ -159,7 +163,12 @@ def main(argv=None) -> dict:
     name = args.name or f"{args.group}-{args.dataset}-D{args.dim}-seed{args.seed}"
     run = init_run(name, args.group, args.tag or ["lab:reproduction"], config, entity=args.entity) if args.wandb else None
 
-    result = fit_and_evaluate(train_x, train_labels, eval_x, eval_labels, spec.num_classes, cfg, args.save_stats)
+    try:
+        result = fit_and_evaluate(train_x, train_labels, eval_x, eval_labels, spec.num_classes, cfg, args.save_stats)
+    except BaseException:
+        if run is not None:
+            run.finish(exit_code=1)
+        raise
 
     paper = PAPER_E1[args.dataset]
     metrics = {
@@ -167,6 +176,9 @@ def main(argv=None) -> dict:
         "paper_accuracy": paper,
         "relative_deviation_pct": relative_deviation(result["accuracy"], paper),
         "rho": result["rho"],
+        "rho_per_class": result.get("rho_per_class"),
+        "mean_variance": result.get("mean_variance"),
+        "lambda_effective": result.get("lambda_effective", cfg.lam),
         "n_train_seen": result["n_train_seen"],
         "time_features_s": result["time_features_s"],
         "time_stats_s": result["time_stats_s"],
@@ -185,7 +197,14 @@ def main(argv=None) -> dict:
         metrics["wandb_url"] = run.url
         run.finish()
 
-    print(json.dumps({"name": name, "gamma": cfg.gamma, **metrics}, indent=2))
+    record = {"name": name, "config": config, "gamma": cfg.gamma, **metrics}
+    if args.output is not None:
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        temporary = output.with_suffix(output.suffix + ".tmp")
+        temporary.write_text(json.dumps(record, indent=2, allow_nan=False), encoding="utf-8")
+        temporary.replace(output)
+    print(json.dumps(record, indent=2))
     return metrics
 
 

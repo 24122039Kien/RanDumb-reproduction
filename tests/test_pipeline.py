@@ -85,3 +85,45 @@ def test_pipeline_rejects_unknown_shrink():
     cfg = PipelineConfig(dim=10, gamma=1.0, lam=0.0, seed=0, shrink="khong-co")
     with pytest.raises(ValueError):
         fit_and_evaluate(train_x, train_y, train_x, train_y, 3, cfg)
+
+
+def test_per_class_oas_matches_independent_reference(monkeypatch):
+    from sklearn.covariance import OAS
+    import randumb.pipeline as pipeline
+
+    generator = torch.Generator().manual_seed(44)
+    x0 = torch.randn(25, 5, generator=generator, dtype=torch.float64)
+    x1 = torch.randn(65, 5, generator=generator, dtype=torch.float64) * 3 + 2
+    x = torch.cat([x0, x1])
+    y = torch.tensor([0] * len(x0) + [1] * len(x1))
+    refs = [OAS(store_precision=False).fit(a.numpy()) for a in [x0, x1]]
+    expected_cov = sum(torch.from_numpy(r.covariance_) * len(a) for r, a in zip(refs, [x0, x1])) / len(x)
+    original_fit = pipeline.fit_lda
+    captured = {}
+
+    def capture(means, cov, lam, **kwargs):
+        captured["cov"] = cov.clone()
+        captured["means"] = means.clone()
+        return original_fit(means, cov, lam, **kwargs)
+
+    monkeypatch.setattr(pipeline, "fit_lda", capture)
+    cfg = PipelineConfig(dim=5, gamma=1.0, lam=0.2, seed=0, features="identity",
+                         feature_dtype=torch.float64, shrink="oas_per_class", lam_mode="relative", batch_size=9)
+    result = fit_and_evaluate(x, y, x, y, 2, cfg)
+    torch.testing.assert_close(captured["cov"], expected_cov)
+    torch.testing.assert_close(captured["means"], torch.stack([x0.mean(0), x1.mean(0)]))
+    assert result["rho_per_class"] == pytest.approx([r.shrinkage_ for r in refs])
+    assert result["rho"] is None
+    assert result["lambda_effective"] == pytest.approx(0.2 * expected_cov.trace().item() / 5)
+    assert result["n_train_seen"] == len(x)
+
+
+def test_relative_ridge_preserves_predictions_under_feature_rescaling():
+    x, y = _blobs()
+    cfg = PipelineConfig(dim=16, gamma=1.0, lam=0.1, seed=0, features="identity",
+                         shrink="oas", lam_mode="relative", feature_dtype=torch.float64)
+    first = fit_and_evaluate(x, y, x, y, 3, cfg)
+    scaled = fit_and_evaluate(1e-5 * x, y, 1e-5 * x, y, 3, cfg)
+    assert first["accuracy"] == scaled["accuracy"]
+    assert first["rho"] == pytest.approx(scaled["rho"], rel=1e-5)
+    assert scaled["lambda_effective"] == pytest.approx(first["lambda_effective"] * 1e-10, rel=1e-5, abs=0)

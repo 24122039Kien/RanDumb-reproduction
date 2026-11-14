@@ -18,7 +18,7 @@ from __future__ import annotations
 import torch
 
 
-def oas_shrink(cov: torch.Tensor, n_samples: int) -> tuple[torch.Tensor, float]:
+def oas_shrink(cov: torch.Tensor, n_samples: int, *, inplace: bool = False) -> tuple[torch.Tensor, float]:
     """Co hiệp phương sai về ``mu I`` theo công thức OAS.
 
     Xử lý trường hợp mẫu số bằng 0 bằng cách trả về ``rho = 1`` (co hoàn toàn).
@@ -26,36 +26,40 @@ def oas_shrink(cov: torch.Tensor, n_samples: int) -> tuple[torch.Tensor, float]:
     Args:
         cov:       Hiệp phương sai, kích thước ``(D, D)``.
         n_samples: Số mẫu dùng để ước lượng ``cov``.
+        inplace: Cho phép sửa covariance đầu vào để tránh bản sao D×D.
 
     Returns:
         Cặp ``(cov_oas, rho)``, trong đó ``rho ∈ [0, 1]`` là hệ số co.
     """
     p = cov.shape[0]
-    dtype = cov.dtype
-    device = cov.device
+    if n_samples < 1:
+        raise ValueError("n_samples phải dương")
 
     # mu = trace(S) / p
-    mu = cov.trace() / p
+    mu = cov.trace().double() / p
 
     # alpha = mean(S_ij²)
-    alpha = (cov ** 2).mean()
+    # Norm reduction không tạo thêm ma trận cov**2. Bình phương scalar ở float64.
+    alpha = torch.linalg.vector_norm(cov).double().square() / (p * p)
 
-    mu2 = mu ** 2
-
-    # Mẫu số có thể bằng 0 nếu alpha == mu²/p
-    denominator = (n_samples + 1) * (alpha - mu2 / p)
-
-    if denominator.abs() < 1e-15 or torch.isnan(denominator):
+    if not torch.isfinite(alpha) or not torch.isfinite(mu):
+        raise ValueError("Covariance chứa giá trị không hữu hạn")
+    # Chia cả tử/mẫu cho alpha: không dùng ngưỡng tuyệt đối làm mất tính
+    # bất biến của rho khi đổi thang đo covariance.
+    if alpha == 0:
         rho = 1.0
     else:
-        rho_raw = (alpha + mu2) / denominator
-        rho = float(rho_raw.clamp(0.0, 1.0))
+        ratio = mu.square() / alpha
+        denominator = (n_samples + 1) * (1 - ratio / p)
+        rho = 1.0 if denominator <= 0 else float(((1 + ratio) / denominator).clamp(0.0, 1.0))
 
-    cov_oas = (1.0 - rho) * cov + rho * mu * torch.eye(p, dtype=dtype, device=device)
+    cov_oas = cov if inplace else cov.clone()
+    cov_oas.mul_(1.0 - rho)
+    cov_oas.diagonal().add_(rho * mu)
     return cov_oas, rho
 
 
-def fit_lda(means: torch.Tensor, cov: torch.Tensor, lam: float) -> torch.Tensor:
+def fit_lda(means: torch.Tensor, cov: torch.Tensor, lam: float, *, inplace: bool = False) -> torch.Tensor:
     """Giải ``(cov + lam I) w_c = mu_c`` cho mọi lớp, không tính nghịch đảo tường minh.
 
     Dùng phân tích Cholesky; nếu ma trận không xác định dương thì fallback sang
@@ -65,15 +69,15 @@ def fit_lda(means: torch.Tensor, cov: torch.Tensor, lam: float) -> torch.Tensor:
         means: Trung bình lớp, kích thước ``(C, D)``.
         cov:   Hiệp phương sai đã co, kích thước ``(D, D)``.
         lam:   Hệ số ridge λ ≥ 0.
+        inplace: Cho phép cộng ridge trực tiếp vào covariance đầu vào.
 
     Returns:
         Ma trận ``w``, kích thước ``(C, D)``.
     """
-    p = cov.shape[0]
-    dtype = cov.dtype
-    device = cov.device
-
-    A = cov + lam * torch.eye(p, dtype=dtype, device=device)  # (D, D)
+    if lam < 0:
+        raise ValueError("lam phải không âm")
+    A = cov if inplace else cov.clone()
+    A.diagonal().add_(lam)
 
     try:
         # Cholesky: A = LLᵀ, giải Lz = μ_cᵀ rồi Lᵀw_c = z
