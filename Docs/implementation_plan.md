@@ -1,8 +1,8 @@
 # Kế hoạch thực hiện đồ án RanDumb
 
 **Nhóm:** Kiên, Đăng, Huy
-**Cập nhật:** 05/11/2026
-**Phạm vi:** Core (E1, E2, E8, E9), làm thêm E3-E7 nếu đủ thời gian
+**Cập nhật:** 14/11/2026 (lập lần đầu 05/11/2026)
+**Phạm vi:** Core (E1, E2, E8, E9). Từ 14/11 bỏ hẳn E3-E7 để kịp hạn deck.
 
 | Sản phẩm | Hạn | Mục tiêu nộp | Điểm |
 |---|---|---|---|
@@ -14,7 +14,75 @@ Tài liệu này chỉ nói ai làm gì và khi nào. Công thức, cấu hình 
 
 ---
 
+## 0. Lịch cập nhật 14/11: từ giờ đến hạn deck
+
+**Lịch này thay cho Sprint 2-4 bên dưới.** Ngày 14/11, code của cả ba người đã nằm trên `main` (37 test qua), nhưng chưa có run thực nghiệm nào. Nhóm trễ khoảng một sprint. Các mục Sprint 2-4 cũ được giữ lại để tham khảo nội dung từng việc.
+
+### Tình hình ngày 14/11
+
+| Việc | Trạng thái |
+|---|---|
+| Phần lõi, dữ liệu, pipeline, script chạy | Xong, đã merge vào `main` |
+| Môi trường Kaggle, W&B project public | Xong ([report2.md](report2.md)) |
+| Cấu hình E1 | **Chưa chốt chuẩn hóa và γ**: γ = 1,0 với z-score chỉ đạt khoảng 10% trên CIFAR-10 (thử trên laptop, D = 1.000, chưa log W&B) |
+| Bộ nhớ ở D = 25.000 | **Chưa xử lý**: có thể vượt 16 GB VRAM của T4 ([report2.md](report2.md), mục 3.3) |
+| Code E2 (loader, trích đặc trưng ViT) | **Chưa có** |
+| Deck | Chưa ghép |
+
+### Thử nhanh γ và chuẩn hóa (laptop, CIFAR-10, D = 1.000, chưa log W&B)
+
+| γ | Chuẩn hóa | Độ chính xác |
+|---|---|---|
+| 1,0 | z-score | 9,82% |
+| 1,0 | chỉ chia 255 | 10,01% |
+| 1,0 | L2 theo từng ảnh | 45,51% |
+| `scale` | z-score (giống code gốc, theo `verification/README.md`) | 45,30% |
+| `scale` | chỉ chia 255 | 44,96% |
+| `scale` | L2 theo từng ảnh | 43,86% |
+
+Mốc tham khảo suy từ bài ở D = 1.000: khoảng 45,2%. Các số này phải chạy lại trên Kaggle có W&B (E8 pha A) mới dùng được trong deck.
+
+### Quyết định cần chốt trong ngày 14/11
+
+1. **Cấu hình chính của E1.** Đề xuất: z-score + γ = `scale`, giống code gốc mà Huy đã kiểm tra. Phương án khác: L2 + γ = 1,0 để giữ giá trị γ của bài. Cả hai đều đạt khoảng 45% ở D = 1.000. Cấu hình còn lại đưa vào E8 làm phân tích sai lệch.
+2. **Phương án dự phòng nếu D = 25.000 không chạy được đến tối 15/11:** dùng `float32` hoặc D = 15.000 và ghi là sai lệch.
+3. **Phạm vi E2:** CIFAR-100, CUB, ImageNet-R, ImageNet-A với cả hai backbone. Bỏ VTAB, OmniBenchmark, Cars ([e2_datasets.md](e2_datasets.md)).
+
+### Lịch từng ngày
+
+| Ngày | Đăng | Kiên | Huy |
+|---|---|---|---|
+| **T7 14/11** | Chốt chuẩn hóa và γ cùng nhóm; sửa bộ nhớ ở D = 25.000 | Viết loader E2 và `extract_vit_features.py` | Chạy E9 nhỏ; viết phần đọc bài của deck |
+| **CN 15/11** | E8 pha A trên Kaggle (W&B); đo giờ và bộ nhớ ở D = 25.000; bắt đầu E1 với MNIST, CIFAR-10 | Trích đặc trưng ViT; E2 với CIFAR-100, CUB | E9 đầy đủ |
+| **T2 16/11** | E1 với CIFAR-100, TinyImageNet, miniImageNet | E2 với ImageNet-R, ImageNet-A | Phần phương pháp và đánh giá của deck |
+| **T3 17/11** | E8 pha B nếu còn thời gian. **Khóa kết quả tối 17/11** | **Khóa kết quả tối 17/11** | Phân tích E9 |
+| **T4 18/11** | Phân tích sai lệch E1, E8; slide E1, E8 | Phân tích sai lệch E2; README, bảng mapping; slide E2 | Ghép deck |
+| **T5 19/11** | Cả nhóm: rà soát chéo, kiểm tra link W&B, mỗi người trình bày lại phần của người khác | | |
+| **T6 20/11** | **Nộp deck và link repo** | | |
+| **T7 21/11** | Dự phòng | | |
+
+### Khối lượng GPU (ước lượng, chưa đo)
+
+| Thực nghiệm | Số run | GPU ước lượng |
+|---|---|---|
+| E8 pha A (D = 2.000) | khoảng 12 | dưới 1 giờ |
+| E1 (D = 25.000, 5 dataset × 3 seed) | 15 | khoảng 3-6 giờ với `float64`, dưới 1 giờ với `float32` |
+| E2 (4 dataset × 2 backbone × 2 phương pháp) | 16 | khoảng 1-2 giờ, phần lớn là trích đặc trưng |
+
+### Rủi ro chính
+
+| Rủi ro | Mốc phát hiện | Phương án |
+|---|---|---|
+| Sửa bộ nhớ D = 25.000 kéo dài | Tối 15/11 | Dùng phương án dự phòng ở quyết định 2 |
+| Code E2 chưa xong | Tối 15/11 | Chỉ giữ CIFAR-100 và CUB |
+| Thiếu quota GPU | Khi chạy | Chia run cho tài khoản Kaggle của cả ba người |
+| Deck chưa ghép kịp | Tối 18/11 | Huy viết phần đọc bài song song từ 14/11, không chờ kết quả |
+
+---
+
 ## 1. Tổng quan các sprint
+
+Bảng dưới là lịch gốc lập ngày 05/11. Từ 14/11 làm theo mục 0.
 
 | Sprint | Thời gian | Mục tiêu | Kết quả cuối sprint |
 |---|---|---|---|
