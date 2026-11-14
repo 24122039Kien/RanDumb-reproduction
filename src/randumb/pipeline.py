@@ -18,7 +18,31 @@ from randumb.features import RandomFourierFeatures, RPReLU
 from randumb.stats import SufficientStats
 from randumb.tracking import Timer
 
-FEATURES = ("rff", "rp-relu")
+FEATURES = ("rff", "rp-relu", "identity")
+
+
+class IdentityFeatures:
+    """Giữ nguyên đầu vào, dùng khi đặc trưng đã có sẵn (ViT ở E2) hoặc bỏ RFF (E3).
+
+    Args:
+        device: Thiết bị tính toán.
+        dtype: Kiểu số của đặc trưng.
+    """
+
+    def __init__(self, device: str = "cpu", dtype: torch.dtype = torch.float32) -> None:
+        self.device = device
+        self.dtype = dtype
+
+    def transform(self, x: torch.Tensor) -> torch.Tensor:
+        """Chuyển đầu vào sang đúng thiết bị và kiểu số.
+
+        Args:
+            x: Tensor ``(B, d)``.
+
+        Returns:
+            Tensor ``(B, d)``.
+        """
+        return x.to(device=self.device, dtype=self.dtype)
 SHRINKS = ("oas", "none")
 
 
@@ -27,7 +51,7 @@ class PipelineConfig:
     """Cấu hình của một lượt học.
 
     Attributes:
-        dim: Số chiều D của biểu diễn ngẫu nhiên.
+        dim: Số chiều D của biểu diễn ngẫu nhiên (bỏ qua với ``identity``).
         gamma: Tham số γ của RFF (bỏ qua với ``rp-relu``).
         lam: Hệ số ridge λ.
         seed: Seed của phép chiếu ngẫu nhiên.
@@ -72,8 +96,8 @@ def resolve_gamma(gamma: Union[str, float], train_x: torch.Tensor) -> float:
     return float(gamma)
 
 
-def build_features(cfg: PipelineConfig, input_dim: int) -> Union[RandomFourierFeatures, RPReLU]:
-    """Tạo phép chiếu ngẫu nhiên theo cấu hình.
+def build_features(cfg: PipelineConfig, input_dim: int) -> Union[RandomFourierFeatures, RPReLU, IdentityFeatures]:
+    """Tạo phép chiếu ngẫu nhiên theo cấu hình; ``"identity"`` thì giữ nguyên đầu vào.
 
     Args:
         cfg: Cấu hình của lượt học.
@@ -89,6 +113,8 @@ def build_features(cfg: PipelineConfig, input_dim: int) -> Union[RandomFourierFe
         return RandomFourierFeatures(input_dim, cfg.dim, cfg.gamma, cfg.seed, cfg.device, cfg.feature_dtype)
     if cfg.features == "rp-relu":
         return RPReLU(input_dim, cfg.dim, cfg.seed, cfg.device, cfg.feature_dtype)
+    if cfg.features == "identity":
+        return IdentityFeatures(cfg.device, cfg.feature_dtype)
     raise ValueError(f"features phải là một trong {FEATURES}, nhận được '{cfg.features}'")
 
 
@@ -122,8 +148,10 @@ def fit_and_evaluate(
     if cfg.shrink not in SHRINKS:
         raise ValueError(f"shrink phải là một trong {SHRINKS}, nhận được '{cfg.shrink}'")
 
-    features = build_features(cfg, flatten(train_x[:1]).shape[1])
-    stats = SufficientStats(cfg.dim, num_classes, cfg.device, cfg.stats_dtype)
+    input_dim = flatten(train_x[:1]).shape[1]
+    features = build_features(cfg, input_dim)
+    dim = input_dim if cfg.features == "identity" else cfg.dim
+    stats = SufficientStats(dim, num_classes, cfg.device, cfg.stats_dtype)
 
     time_features = time_stats = 0.0
     n_train_seen = 0
