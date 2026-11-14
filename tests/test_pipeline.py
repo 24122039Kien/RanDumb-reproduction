@@ -67,6 +67,19 @@ def test_pipeline_is_deterministic_and_order_invariant():
     assert first["accuracy"] == shuffled["accuracy"]
 
 
+@needs_core
+def test_pipeline_identity_features_use_input_dimension():
+    train_x, train_y = _blobs(seed=4)
+    eval_x, eval_y = _blobs(n_per_class=20, seed=4)
+    flat_train, flat_eval = train_x.reshape(len(train_x), -1), eval_x.reshape(len(eval_x), -1)
+    cfg = PipelineConfig(dim=0, gamma=0.0, lam=1e-4, seed=0, features="identity", batch_size=32)
+
+    result = fit_and_evaluate(flat_train, train_y, flat_eval, eval_y, 3, cfg)
+
+    assert result["accuracy"] > 90
+    assert result["n_train_seen"] == len(train_y)
+
+
 def test_pipeline_rejects_unknown_shrink():
     train_x, train_y = _blobs()
     cfg = PipelineConfig(dim=10, gamma=1.0, lam=0.0, seed=0, shrink="khong-co")
