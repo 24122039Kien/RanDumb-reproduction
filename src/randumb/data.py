@@ -189,6 +189,34 @@ def load_images(
     return torch.from_numpy(images), torch.from_numpy(labels)
 
 
+def split_indices(labels: torch.Tensor, fraction: float, seed: int) -> tuple[torch.Tensor, torch.Tensor]:
+    """Chia chỉ số mẫu thành hai phần, giữ nguyên tỉ lệ giữa các lớp.
+
+    Args:
+        labels: Nhãn ``int64`` ``(N,)``.
+        fraction: Tỉ lệ mỗi lớp đưa vào phần thứ hai, trong khoảng ``(0, 1)``.
+        seed: Seed của phép chia.
+
+    Returns:
+        Cặp ``(first_idx, second_idx)``, mỗi tensor đã sắp tăng dần.
+
+    Raises:
+        ValueError: Nếu ``fraction`` không nằm trong ``(0, 1)``.
+    """
+    if not 0.0 < fraction < 1.0:
+        raise ValueError(f"fraction phải nằm trong (0, 1), nhận được {fraction}")
+    generator = torch.Generator().manual_seed(seed)
+    second_parts = []
+    for cls in torch.unique(labels):
+        idx = torch.nonzero(labels == cls).flatten()
+        idx = idx[torch.randperm(len(idx), generator=generator)]
+        second_parts.append(idx[: int(round(len(idx) * fraction))])
+    second_idx = torch.cat(second_parts).sort().values
+    mask = torch.ones(len(labels), dtype=torch.bool)
+    mask[second_idx] = False
+    return torch.nonzero(mask).flatten(), second_idx
+
+
 def train_val_split(
     images: torch.Tensor,
     labels: torch.Tensor,
@@ -211,18 +239,7 @@ def train_val_split(
     Raises:
         ValueError: Nếu ``val_fraction`` không nằm trong ``(0, 1)``.
     """
-    if not 0.0 < val_fraction < 1.0:
-        raise ValueError(f"val_fraction phải nằm trong (0, 1), nhận được {val_fraction}")
-    generator = torch.Generator().manual_seed(seed)
-    val_parts = []
-    for cls in torch.unique(labels):
-        idx = torch.nonzero(labels == cls).flatten()
-        idx = idx[torch.randperm(len(idx), generator=generator)]
-        val_parts.append(idx[: int(round(len(idx) * val_fraction))])
-    val_idx = torch.cat(val_parts).sort().values
-    mask = torch.ones(len(labels), dtype=torch.bool)
-    mask[val_idx] = False
-    train_idx = torch.nonzero(mask).flatten()
+    train_idx, val_idx = split_indices(labels, val_fraction, seed)
     return (images[train_idx], labels[train_idx]), (images[val_idx], labels[val_idx])
 
 

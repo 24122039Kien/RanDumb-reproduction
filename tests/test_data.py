@@ -54,6 +54,13 @@ def test_train_val_split_is_stratified_disjoint_and_seeded():
     assert torch.equal(va_x, va_x2)
 
 
+def test_split_indices_is_stratified_and_complete():
+    labels = torch.arange(30) % 3
+    first, second = data.split_indices(labels, 0.2, seed=1)
+    assert torch.bincount(labels[second]).tolist() == [2, 2, 2]
+    assert sorted(first.tolist() + second.tolist()) == list(range(30))
+
+
 def test_train_val_split_rejects_bad_fraction():
     with pytest.raises(ValueError):
         train_val_split(torch.zeros(4, 1, 1, 1), torch.zeros(4, dtype=torch.long), 1.0, seed=0)
