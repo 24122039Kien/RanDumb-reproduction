@@ -58,9 +58,28 @@ Chưa xác minh được: trang GitHub của LAMDA-PILOT (bị lỗi 504 khi tra
 ## 3. Đề xuất cho E2
 
 1. **Chạy ngay** CIFAR-100, CUB, ImageNet-R, ImageNet-A từ HF, với cả hai backbone.
-   - ImageNet-R và ImageNet-A: tự chia 80/20 theo từng lớp với seed cố định. Lưu danh sách chỉ số vào repo để ai cũng tái tạo được.
+   - ImageNet-R và ImageNet-A: tự chia 80/20 theo từng lớp với seed cố định (`SPLIT_SEED = 0` trong `src/randumb/vit_features.py`). Cùng code và cùng phiên bản dataset trên HF thì luôn ra cùng cách chia.
    - Ghi cả 4 dataset là "dataset tương đương" trong phân tích sai lệch, trừ CIFAR-100.
 2. **Hỏi trợ giảng** trước ngày 09/11: có chấp nhận tải file của RevisitingCIL từ Google Drive bằng code (ví dụ `gdown`) trên Kaggle không, khi nhóm không upload lại. Nếu được, dùng cách này cho VTAB và có thể cho cả 4 dataset trên, để khớp đúng cách chia của bài.
 3. **Nếu trợ giảng không đồng ý:** bỏ VTAB và OmniBenchmark, ghi rõ lý do. Thứ tự cắt giảm trong kế hoạch vốn đã bỏ VTAB đầu tiên.
 4. **Cars** chỉ làm khi còn thời gian, vì bài chỉ báo cáo cho backbone IN-21K.
 5. **Không upload** các file của RevisitingCIL lên HF hay Kaggle, vì tác giả không có quyền phân phối, và OmniBenchmark có giấy phép ND.
+
+---
+
+## 4. Giao thức E2 đã cài (14/11)
+
+Cập nhật lịch 14/11 chốt phạm vi E2 là CIFAR-100, CUB, ImageNet-R, ImageNet-A với cả hai backbone; bỏ VTAB, OmniBenchmark, Cars.
+
+| Thành phần | Lựa chọn của nhóm | Lý do / nguồn |
+|---|---|---|
+| Backbone IN-1K | `vit_base_patch16_224.augreg_in21k_ft_in1k` | Từ timm 1.x, tên ngắn `vit_base_patch16_224` trỏ tới `augreg2_in21k_ft_in1k`; bản `augreg_in21k_ft_in1k` gần với timm 0.6 mà các bài cùng thời dùng. Đổi được bằng `--model-name` |
+| Backbone IN-21K | `vit_base_patch16_224.augreg_in21k` | Tên ngắn `vit_base_patch16_224_in21k` cũng trỏ tới bản này (đã kiểm tra trên timm 1.0.11 và 1.0.30) |
+| Đặc trưng | Vector pre-logits 768 chiều (`num_classes=0`) | Bài: học bộ phân loại tuyến tính trên đặc trưng ViT |
+| Tiền xử lý | RGB, thu thẳng về 224×224 bằng bicubic, không cắt giữa | Bài không nêu |
+| Chuẩn hóa mean/std | Mặc định **có** (mean = std = 0,5 theo timm); `--no-normalize` để giữ `[0, 1]` như code gốc | Code gốc không chuẩn hóa (Instruction.md, mục 4.4); nên chạy cả hai nếu còn thời gian |
+| RanDumb | LDA + OAS trên hiệp phương sai gộp, λ = 0, không RFF, không flip | Bài không nêu λ cho Benchmark F; code gốc dùng λ = 0 (`verification/README.md`) |
+| NCM | Khoảng cách Euclid tới trung bình lớp; có `--ncm-metric cosine` và `dot` | Bài không nói NCM dùng khoảng cách nào |
+| Seed | 1 seed; E2 không có yếu tố ngẫu nhiên ngoài cách chia đã cố định | Kế hoạch, mục 3 |
+
+**Đã kiểm tra trên laptop (14/11, không log W&B):** tải CIFAR-100 thật, tải trọng số `augreg_in21k` thật, đặc trưng 768 chiều hợp lệ. Trên một tập con chỉ có 1 ảnh mỗi lớp, NCM và RanDumb đạt khoảng 44-45% trên 100 lớp (đoán ngẫu nhiên: 1%). Laptop chỉ trích được khoảng 8,5 ảnh/giây, nên chạy thật trên Kaggle bằng `notebooks/02_e2_vit.ipynb`.
