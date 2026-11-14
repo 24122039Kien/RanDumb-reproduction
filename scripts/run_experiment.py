@@ -7,7 +7,7 @@ Ví dụ chạy thử trên laptop, không log W&B:
 
 Ví dụ trên Kaggle:
 
-    python scripts/run_experiment.py --dataset cifar100 --dim 25000 --lam 1e-5 \
+    python scripts/run_experiment.py --dataset cifar100 --dim 25000 --gamma 1.0 --lam 1e-5 \
         --group E1 --tag lab:reproduction --seed 0
 """
 from __future__ import annotations
@@ -31,6 +31,8 @@ from randumb.tracking import init_run, peak_ram_gb, peak_vram_gb, relative_devia
 
 # Độ chính xác của RanDumb trong bài (Docs/Instruction.md, mục 4.3).
 PAPER_E1 = {"mnist": 98.3, "cifar10": 55.6, "cifar100": 28.6, "tiny-imagenet": 11.6, "mini-imagenet": 17.7}
+# Paper, Section 3, Implementation Details (PDF p. 6).
+PAPER_LAM = {"mnist": 1e-6, "cifar10": 1e-5, "cifar100": 1e-5, "tiny-imagenet": 1e-4, "mini-imagenet": 1e-4}
 DTYPES = {"float32": torch.float32, "float64": torch.float64}
 
 
@@ -47,8 +49,8 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--dataset", required=True, help="khóa trong randumb.data.DATASETS")
     parser.add_argument("--dim", type=int, default=25_000, help="số chiều D của đặc trưng")
     parser.add_argument("--features", choices=FEATURES, default="rff")
-    parser.add_argument("--gamma", default="scale", help="số thực, hoặc 'scale' = 1/(d·Var(X))")
-    parser.add_argument("--lam", type=float, required=True, help="hệ số ridge λ")
+    parser.add_argument("--gamma", default="1.0", help="mặc định 1.0 theo paper; 'scale' dành cho phân tích độ nhạy")
+    parser.add_argument("--lam", type=float, default=None, help="hệ số ridge λ, mặc định theo dataset trong paper")
     parser.add_argument("--lam-mode", choices=["fixed", "relative"], default="fixed")
     parser.add_argument("--norm", choices=NORMALIZATIONS, default="zscore")
     parser.add_argument("--shrink", choices=["oas", "oas_per_class", "none"], default="oas")
@@ -61,6 +63,8 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--max-eval", type=int, default=None, help="lấy ngẫu nhiên tối đa N ảnh đánh giá để chạy thử")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--dtype", choices=sorted(DTYPES), default="float64", help="kiểu số của thống kê và phép giải")
+    parser.add_argument("--feature-dtype", choices=sorted(DTYPES), default="float64",
+                        help="kiểu số của RFF; nhóm chọn float64, paper không công bố dtype")
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--batch-size", type=int, default=512)
     parser.add_argument("--cache-dir", default=None, help="nơi lưu ảnh đã giải mã, mặc định <repo>/data/cache")
@@ -111,6 +115,8 @@ def main(argv=None) -> dict:
 
     set_seed(args.seed)
     spec = get_spec(args.dataset)
+    if args.lam is None:
+        args.lam = PAPER_LAM[args.dataset]
 
     load_kwargs = {"cache_dir": args.cache_dir, "hf_cache_dir": args.hf_cache_dir, "use_cache": args.cache}
     train_images, train_labels = load_images(args.dataset, "train", **load_kwargs)
@@ -139,6 +145,7 @@ def main(argv=None) -> dict:
         batch_size=args.batch_size,
         device=args.device,
         stats_dtype=DTYPES[args.dtype],
+        feature_dtype=DTYPES[args.feature_dtype],
     )
     config = {
         **{k: v for k, v in vars(args).items() if k not in ("wandb", "entity")},
