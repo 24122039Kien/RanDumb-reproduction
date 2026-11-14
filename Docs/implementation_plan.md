@@ -98,10 +98,10 @@ Tài liệu này chỉ nói ai làm gì và khi nào. Công thức, cấu hình 
 **Mục tiêu:** pipeline chạy từ đầu đến cuối trên dữ liệu thật ở D nhỏ.
 
 **Đăng**
-- [ ] **06/11:** `classifier.py` gồm `oas_shrink`, `fit_lda` (Cholesky, lỗi thì dùng `lstsq`), `predict`. Viết test 4, 5.
-- [ ] **07/11:** `stats.py` gồm `SufficientStats` với `update`, `finalize`, `save`, `load`. Viết test 2, 3.
-- [ ] **07/11:** `features.py` gồm `RandomFourierFeatures` dạng D chiều và `RPReLU`. Viết test 1, 6.
-- [ ] **08/11:** Ghép pipeline cùng Kiên, viết docstring cho các hàm chính.
+- [x] **06/11:** `classifier.py` gồm `oas_shrink`, `fit_lda` (Cholesky, lỗi thì dùng `lstsq`), `predict`. Viết test 4, 5.
+- [x] **07/11:** `stats.py` gồm `SufficientStats` với `update`, `finalize`, `save`, `load`. Viết test 2, 3.
+- [x] **07/11:** `features.py` gồm `RandomFourierFeatures` dạng D chiều và `RPReLU`. Viết test 1, 6.
+- [x] **08/11:** Ghép pipeline cùng Kiên, viết docstring cho các hàm chính. Đã xác nhận code trên `main` và tests tích hợp ngày 14/11; run dữ liệu thật để nghiệm thu Sprint 1 vẫn chưa được xác nhận.
 
 **Kiên**
 - [ ] **06/11:** `data.py` tải MNIST, CIFAR-10, CIFAR-100, TinyImageNet, miniImageNet, có `assert` về số mẫu và tên cột.
@@ -190,10 +190,12 @@ Một chi tiết nên nêu: Bảng 1 trái cho thấy RanDumb **thua** PEC 3,3 �
 - [ ] **11/11:** Log tên mô hình và phiên bản `timm`; thử có và không chuẩn hóa mean/std.
 
 **Đăng**
-- [ ] **09/11:** Cùng Kiên chốt D, kiểu số và cách chia phiên chạy.
+- [x] **09/11 (hoàn tất quyết định 14/11):** Chốt D, kiểu số và cách chia phiên chạy theo quyền tự quyết Đăng đã giao: D=25.000, RFF/thống kê/phép giải float64, 1 dataset × 1 seed/tiến trình. Chi tiết và các giả định ở [nhatky_Dang.md](../nhatky_Dang.md). Đo tài nguyên thực tế chưa hoàn tất; đây không phải xác nhận đã trao đổi với Kiên.
 - [ ] **10/11:** Chạy E8 pha A: 3 kiểu chuẩn hóa × 4 giá trị γ (1,0; `scale` × 0,25; `scale`; `scale` × 4) trên CIFAR-10, D = 2.000, chấm trên validation.
 - [ ] **11/11:** Kiểm tra lại 2 cấu hình tốt nhất trên CIFAR-100, rồi chốt cấu hình mặc định kèm lý do.
 - [ ] **11/11:** Thêm các chế độ cho E8 pha B: OAS theo từng lớp, không OAS, λ tỉ lệ `trace(S)/D`.
+
+**Cập nhật theo yêu cầu Đăng ngày 14/11:** E1 giữ D, γ và λ đúng các giá trị paper công bố; E8 chỉ phân tích độ nhạy, không thay mặc định E1 bằng cấu hình đạt accuracy cao hơn. Không áp dụng phương án giảm D=15.000 ở các mục dự phòng cũ cho E1. Chuẩn hóa, dtype và seed cụ thể không được paper công bố đầy đủ; xem quyết định và giới hạn trong nhật ký.
 
 **Huy**
 - [ ] **09/11:** Viết phần phương pháp của deck: ký hiệu, bài toán hình thức, sơ đồ pipeline tự vẽ, từng thành phần.
