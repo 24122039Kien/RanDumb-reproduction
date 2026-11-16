@@ -291,4 +291,9 @@ def load_features(path: Union[str, Path]) -> dict:
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"Chưa có {path}. Hãy chạy scripts/extract_vit_features.py trước.")
+    # File trích trước 16/11 lưu torch.__version__ (kiểu TorchVersion, không phải str),
+    # mà chế độ đọc an toàn weights_only không cho phép mặc định.
+    from torch.torch_version import TorchVersion
+
+    torch.serialization.add_safe_globals([TorchVersion])
     return torch.load(path, map_location="cpu", weights_only=True)
