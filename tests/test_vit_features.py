@@ -110,3 +110,36 @@ def test_features_roundtrip(tmp_path, monkeypatch):
     assert torch.equal(loaded["train_x"], payload["train_x"]) and loaded["meta"]["mean"] == (0.5, 0.5, 0.5)
     with pytest.raises(FileNotFoundError):
         vf.load_features(tmp_path / "khong-co.pt")
+
+
+def test_load_features_accepts_old_files_with_torch_version(tmp_path):
+    # File trích trên Kaggle trước 16/11 lưu torch.__version__ nguyên kiểu TorchVersion.
+    path = tmp_path / "old.pt"
+    torch.save({"train_x": torch.ones(1, 2), "meta": {"torch_version": torch.__version__}}, path)
+    assert vf.load_features(path)["meta"]["torch_version"] == torch.__version__
+
+
+def test_extract_script_writes_a_file_run_e2_can_read(tmp_path, monkeypatch):
+    """Chạy đúng đường đi của scripts/extract_vit_features.py với dataset và mô hình giả."""
+    import importlib.util
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("extract", root / "scripts" / "extract_vit_features.py")
+    extract = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(extract)
+
+    data = FakeDataset({"img": _images(6), "fine_label": [0, 1, 2, 0, 1, 2]})
+    splits = {"train": (data, torch.arange(4), torch.tensor([0, 1, 2, 0])),
+              "test": (data, torch.tensor([4, 5]), torch.tensor([1, 2]))}
+    model = torch.nn.Sequential(torch.nn.AdaptiveAvgPool2d(2), torch.nn.Flatten())
+    info = {"backbone": "in21k", "model_name": "fake", "pretrained_tag": "fake", "hf_hub_id": None,
+            "mean": (0.5, 0.5, 0.5), "std": (0.5, 0.5, 0.5), "timm_version": "0", "feature_dim": 12}
+    monkeypatch.setattr(extract, "load_e2_splits", lambda *a, **k: splits)
+    monkeypatch.setattr(extract, "create_backbone", lambda *a, **k: (model, info))
+
+    out = extract.main(["--dataset", "cifar100", "--backbone", "in21k", "--device", "cpu",
+                        "--out", str(tmp_path / "f.pt"), "--batch-size", "4"])
+    loaded = vf.load_features(out)
+    assert loaded["train_x"].shape == (4, 12) and loaded["test_x"].shape == (2, 12)
+    assert isinstance(loaded["meta"]["torch_version"], str)

@@ -84,7 +84,7 @@ def main(argv=None) -> Path:
         "n_train": len(payload["train_y"]),
         "n_test": len(payload["test_y"]),
         "extract_seconds": time.perf_counter() - start,
-        "torch_version": torch.__version__,
+        "torch_version": str(torch.__version__),  # TorchVersion không đọc được với weights_only
     }
     save_features(out, payload)
     print(json.dumps({"out": str(out), **payload["meta"]}, indent=2, default=str))
