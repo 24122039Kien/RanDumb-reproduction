@@ -50,3 +50,28 @@ def test_run_e2_missing_features_file_is_explained(runner, tmp_path):
     with pytest.raises(FileNotFoundError, match="extract_vit_features"):
         runner.main(["--dataset", "cub", "--backbone", "in1k", "--method", "ncm",
                      "--features-file", str(tmp_path / "none.pt"), "--no-wandb"])
+
+
+def test_split_seed_resplits_self_split_dataset(runner, features_file):
+    base = ["--dataset", "imagenet-a", "--backbone", "in1k", "--method", "randumb",
+            "--features-file", str(features_file), "--no-wandb", "--device", "cpu"]
+    first = runner.main(base + ["--split-seed", "1"])
+    again = runner.main(base + ["--split-seed", "1"])
+    # 140 mẫu, mỗi lớp 70: 14 mẫu mỗi lớp vào test.
+    assert (first["n_train"], first["n_test"]) == (112, 28)
+    assert first["final_accuracy"] == again["final_accuracy"]
+    assert first["paper_accuracy"] == 49.5
+
+
+def test_split_seed_rejected_when_dataset_has_its_own_test_split(runner, features_file):
+    with pytest.raises(SystemExit):
+        runner.main(["--dataset", "cifar100", "--backbone", "in21k", "--method", "ncm",
+                     "--features-file", str(features_file), "--no-wandb", "--split-seed", "1"])
+
+
+def test_default_name_separates_ncm_metric_and_split(runner):
+    args = runner.parse_args(["--dataset", "imagenet-a", "--backbone", "in1k", "--method", "ncm",
+                              "--ncm-metric", "cosine", "--split-seed", "2"])
+    assert runner.default_name(args) == "E2-imagenet-a-in1k-ncm-cosine-split2-seed0"
+    args = runner.parse_args(["--dataset", "cub", "--backbone", "in1k", "--method", "ncm"])
+    assert runner.default_name(args) == "E2-cub-in1k-ncm-seed0"  # trùng tên các run đã có

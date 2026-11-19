@@ -22,7 +22,9 @@ for _stream in (sys.stdout, sys.stderr):
 from randumb.baselines import NCM_METRICS, class_means, predict_ncm  # noqa: E402
 from randumb.pipeline import PipelineConfig, fit_and_evaluate  # noqa: E402
 from randumb.tracking import Timer, init_run, relative_deviation, set_seed  # noqa: E402
-from randumb.vit_features import BACKBONES, E2_DATASETS, features_path, load_features  # noqa: E402
+from randumb.vit_features import (  # noqa: E402
+    BACKBONES, E2_DATASETS, features_path, load_features, resplit_features,
+)
 
 # Số của bài (Docs/Instruction.md, mục 4.4; Bảng 1 phải và Bảng 7).
 PAPER_E2 = {
@@ -53,6 +55,8 @@ def parse_args(argv=None) -> argparse.Namespace:
                         help="λ của RanDumb; bài không nêu cho Benchmark F, code gốc dùng 0")
     parser.add_argument("--shrink", choices=["oas", "none"], default="oas")
     parser.add_argument("--ncm-metric", choices=NCM_METRICS, default="euclidean")
+    parser.add_argument("--split-seed", type=int, default=None,
+                        help="chỉ cho ImageNet-R/-A: gộp train+test rồi chia lại 80/20 theo seed này")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--batch-size", type=int, default=1024)
@@ -61,7 +65,26 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--name", default=None, help="mặc định <group>-<dataset>-<backbone>-<method>-seed<seed>")
     parser.add_argument("--entity", default=None)
     parser.add_argument("--wandb", action=argparse.BooleanOptionalAction, default=True)
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.split_seed is not None and E2_DATASETS[args.dataset].test_split is not None:
+        parser.error(f"--split-seed chỉ dùng cho dataset tự chia; {args.dataset} đã có tập test riêng")
+    return args
+
+
+def default_name(args: argparse.Namespace) -> str:
+    """Tên run W&B, phân biệt khoảng cách NCM và cách chia lại.
+
+    Args:
+        args: Tham số của run.
+
+    Returns:
+        Ví dụ ``E2-imagenet-a-in1k-ncm-cosine-split1-seed0``.
+    """
+    method = args.method
+    if method == "ncm" and args.ncm_metric != "euclidean":
+        method = f"ncm-{args.ncm_metric}"
+    split = f"-split{args.split_seed}" if args.split_seed is not None else ""
+    return f"{args.group}-{args.dataset}-{args.backbone}-{method}{split}-seed{args.seed}"
 
 
 def run_ncm(train_x, train_y, test_x, test_y, num_classes: int, metric: str, device: str) -> dict:
@@ -104,8 +127,11 @@ def main(argv=None) -> dict:
     set_seed(args.seed)
     path = Path(args.features_file) if args.features_file else features_path(args.dataset, args.backbone, args.normalize)
     data = load_features(path)
+    spec = E2_DATASETS[args.dataset]
+    if args.split_seed is not None:
+        data = resplit_features(data, spec.test_fraction, args.split_seed)
     meta = data["meta"]
-    num_classes = E2_DATASETS[args.dataset].num_classes
+    num_classes = spec.num_classes
 
     if args.method == "randumb":
         cfg = PipelineConfig(dim=0, gamma=0.0, lam=args.lam, seed=args.seed, features="identity",
@@ -124,8 +150,10 @@ def main(argv=None) -> dict:
         "rho": result["rho"],
         "time_solve_s": result["time_solve_s"],
         "time_predict_s": result["time_predict_s"],
+        "n_train": len(data["train_y"]),
+        "n_test": len(data["test_y"]),
     }
-    name = args.name or f"{args.group}-{args.dataset}-{args.backbone}-{args.method}-seed{args.seed}"
+    name = args.name or default_name(args)
     if args.wandb:
         config = {
             **{k: v for k, v in vars(args).items() if k not in ("wandb", "entity")},
