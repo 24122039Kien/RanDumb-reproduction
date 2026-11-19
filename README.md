@@ -2,7 +2,7 @@
 
 Term project của môn **Nhập môn Học máy (Introduction to Machine Learning)**, chủ đề *never-ending learning*. Nhóm đọc, tự cài lại, chạy lại thực nghiệm và phản biện một bài báo đã công bố trong suốt học kỳ.
 
-> **Trạng thái:** Đang ở giai đoạn chuẩn bị. Repo chưa có phần cài đặt phương pháp và chưa có kết quả thực nghiệm nào.
+> **Trạng thái:** Phần lõi và code E2 đã có trên `main`. Phần chạy E1/E8 của Đăng được chuẩn bị trên nhánh `dang/sprint-3-experiments`; chưa có kết quả E1/E8 được xác nhận tại đây.
 
 **Thành viên:** *(điền tên và MSSV)*
 **W&B project:** [randumb-reproduction-24TNT](https://forge.coreweave.com/wandb/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT) (public)
@@ -64,11 +64,11 @@ Nhóm dự kiến chọn **Core scope** (chưa chốt). Chi tiết từng bướ
 | [verification/](verification/) | Script kiểm chứng với code gốc, không chứa code gốc |
 | [data/](data/) | Nơi lưu dữ liệu tải về và cache khi chạy; nội dung không được commit |
 
-Trạng thái `src/randumb/`: toàn bộ module đã có trên `main`. Đặc trưng ViT cho E2 nằm ở `vit_features.py`, NCM ở `baselines.py`.
+Trạng thái `src/randumb/`: toàn bộ module đã có trên `main`. Đặc trưng ViT cho E2 nằm ở `vit_features.py`, NCM ở `baselines.py`. Mốc cập nhật xem [Docs/report3.md](Docs/report3.md) và [Docs/report4.md](Docs/report4.md).
 
 ## Cài đặt và chạy
 
-*Sẽ cập nhật khi có phần cài đặt.* Môn yêu cầu Python 3.9 trở lên, và mục này phải hướng dẫn đủ để chạy lại mọi thứ từ đầu đến cuối.
+Hướng dẫn phần **Sprint 3 của Đăng (E1 và E8-B)**: [Docs/sprint3_Dang.md](Docs/sprint3_Dang.md), notebook [03_dang_sprint3.ipynb](notebooks/03_dang_sprint3.ipynb). Cấu hình Đăng chốt: **γ=1.0 + L2**, D=25.000 cho E1. Nhật ký ghi rõ các chi tiết paper không công bố đầy đủ. Chạy dữ liệu thật cần máy đủ bộ nhớ và W&B; chưa có kết quả E1/E8 để điền bảng.
 
 ## Bảng kết quả
 

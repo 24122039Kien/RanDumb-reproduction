@@ -43,7 +43,7 @@ class IdentityFeatures:
             Tensor ``(B, d)``.
         """
         return x.to(device=self.device, dtype=self.dtype)
-SHRINKS = ("oas", "none")
+SHRINKS = ("oas", "oas_per_class", "none")
 
 
 @dataclass
@@ -53,10 +53,11 @@ class PipelineConfig:
     Attributes:
         dim: Số chiều D của biểu diễn ngẫu nhiên (bỏ qua với ``identity``).
         gamma: Tham số γ của RFF (bỏ qua với ``rp-relu``).
-        lam: Hệ số ridge λ.
+        lam: Hệ số ridge λ cố định, hoặc alpha khi lam_mode="relative".
+        lam_mode: "fixed" hoặc lambda = alpha * trace(cov) / D.
         seed: Seed của phép chiếu ngẫu nhiên.
         features: ``"rff"`` hoặc ``"rp-relu"``.
-        shrink: ``"oas"`` (OAS trên hiệp phương sai gộp) hoặc ``"none"``.
+        shrink: ``"oas"`` (gộp), ``"oas_per_class"`` (co từng lớp rồi gộp), ``"none"``.
         flip: Có thêm ảnh lật ngang khi train hay không.
         batch_size: Số ảnh gốc mỗi lô.
         device: Thiết bị tính toán.
@@ -75,6 +76,7 @@ class PipelineConfig:
     device: str = "cpu"
     stats_dtype: torch.dtype = torch.float64
     feature_dtype: torch.dtype = torch.float32
+    lam_mode: str = "fixed"
 
 
 def resolve_gamma(gamma: Union[str, float], train_x: torch.Tensor) -> float:
@@ -147,32 +149,71 @@ def fit_and_evaluate(
     """
     if cfg.shrink not in SHRINKS:
         raise ValueError(f"shrink phải là một trong {SHRINKS}, nhận được '{cfg.shrink}'")
+    if cfg.lam_mode not in ("fixed", "relative"):
+        raise ValueError("lam_mode phải là fixed hoặc relative")
+    if cfg.shrink == "oas_per_class" and stats_path is not None:
+        raise ValueError("Chưa hỗ trợ lưu sufficient stats cho OAS từng lớp")
 
     input_dim = flatten(train_x[:1]).shape[1]
     features = build_features(cfg, input_dim)
     dim = input_dim if cfg.features == "identity" else cfg.dim
-    stats = SufficientStats(dim, num_classes, cfg.device, cfg.stats_dtype)
-
     time_features = time_stats = 0.0
-    n_train_seen = 0
-    for x_batch, y_batch in iter_batches(train_x, train_y, cfg.batch_size, cfg.flip):
-        with Timer() as timer:
-            phi = features.transform(x_batch)
-        time_features += timer.seconds
-        with Timer() as timer:
-            stats.update(phi, y_batch)
-        time_stats += timer.seconds
-        n_train_seen += len(y_batch)
 
-    if stats_path is not None:
-        stats.save(stats_path)
+    def accumulate(x, y, classes):
+        nonlocal time_features, time_stats
+        stats = SufficientStats(dim, classes, cfg.device, cfg.stats_dtype)
+        seen = 0
+        for x_batch, y_batch in iter_batches(x, y, cfg.batch_size, cfg.flip):
+            with Timer() as timer:
+                phi = features.transform(x_batch)
+            time_features += timer.seconds
+            with Timer() as timer:
+                stats.update(phi, y_batch)
+            time_stats += timer.seconds
+            seen += len(y_batch)
+        return stats, seen
+
+    rho = None
+    rho_per_class = None
+    if cfg.shrink == "oas_per_class":
+        # E8: xử lý các lớp lần lượt, mỗi ảnh chỉ dùng một lần. Không giữ C
+        # covariance D×D cùng lúc; đây là đánh giá cuối luồng class-incremental.
+        cov = torch.zeros(dim, dim, device=cfg.device, dtype=cfg.stats_dtype)
+        means = torch.zeros(num_classes, dim, device=cfg.device, dtype=cfg.stats_dtype)
+        rho_per_class = [None] * num_classes
+        n_train_seen = 0
+        for c in range(num_classes):
+            indices = (train_y == c).nonzero(as_tuple=True)[0]
+            if len(indices) == 0:
+                continue
+            stats, seen = accumulate(train_x[indices], torch.zeros_like(train_y[indices]), 1)
+            with Timer() as timer:
+                class_means, class_cov = stats.finalize(consume=True)
+                class_cov, rho_c = oas_shrink(class_cov, seen, inplace=True)
+                cov.add_(class_cov, alpha=seen)
+                means[c] = class_means[0]
+                rho_per_class[c] = rho_c
+                del class_cov, stats
+            time_stats += timer.seconds
+            n_train_seen += seen
+        if n_train_seen == 0:
+            raise ValueError("Tập train rỗng")
+        cov.div_(n_train_seen)
+    else:
+        stats, n_train_seen = accumulate(train_x, train_y, num_classes)
+        if stats_path is not None:
+            stats.save(stats_path)
 
     with Timer() as solve_timer:
-        means, cov = stats.finalize()
-        rho = None
-        if cfg.shrink == "oas":
-            cov, rho = oas_shrink(cov, n_train_seen)
-        weights = fit_lda(means, cov, cfg.lam)
+        if cfg.shrink != "oas_per_class":
+            means, cov = stats.finalize(consume=True)
+            del stats
+            if cfg.shrink == "oas":
+                cov, rho = oas_shrink(cov, n_train_seen, inplace=True)
+        mean_variance = float(cov.trace() / dim)
+        lambda_effective = cfg.lam * mean_variance if cfg.lam_mode == "relative" else cfg.lam
+        weights = fit_lda(means, cov, lambda_effective, inplace=True)
+        del cov
 
     predictions = []
     with Timer() as predict_timer:
@@ -190,6 +231,9 @@ def fit_and_evaluate(
         "accuracy": float(correct.float().mean() * 100),
         "per_class_accuracy": per_class,
         "rho": rho,
+        "rho_per_class": rho_per_class,
+        "mean_variance": mean_variance,
+        "lambda_effective": lambda_effective,
         "n_train_seen": n_train_seen,
         "time_features_s": time_features,
         "time_stats_s": time_stats,

@@ -101,3 +101,17 @@ def test_save_load_roundtrip():
 
     assert torch.allclose(means_orig, means_loaded), "Trung bình lớp sau load/save không khớp"
     assert torch.allclose(cov_orig, cov_loaded), "Hiệp phương sai sau load/save không khớp"
+
+
+def test_consuming_finalize_transfers_covariance_and_prevents_reuse(tmp_path):
+    phi, y = _make_data()
+    stats = _accumulate_all(phi, y, 3, 11)
+    pointer = stats._A.data_ptr()
+    expected_means, expected_cov = stats.finalize()
+    means, cov = stats.finalize(consume=True)
+    assert cov.data_ptr() == pointer
+    torch.testing.assert_close(means, expected_means)
+    torch.testing.assert_close(cov, expected_cov)
+    for operation in [lambda: stats.update(phi, y), stats.finalize, lambda: stats.save(tmp_path / "used.pt")]:
+        with pytest.raises(RuntimeError, match="consume"):
+            operation()

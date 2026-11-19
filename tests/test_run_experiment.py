@@ -22,7 +22,7 @@ def runner():
     ("tiny-imagenet", 1e-4, True),
     ("mini-imagenet", 1e-4, True),
 ])
-def test_default_run_passes_paper_settings_to_pipeline(runner, monkeypatch, dataset, lam, flip):
+def test_default_run_passes_paper_settings_to_pipeline(runner, monkeypatch, tmp_path, dataset, lam, flip):
     # Không cấp phát ma trận D=25K: bắt cấu hình tại ranh giới gọi pipeline.
     images = torch.arange(24, dtype=torch.uint8).reshape(2, 2, 2, 3)
     labels = torch.tensor([0, 1])
@@ -38,7 +38,14 @@ def test_default_run_passes_paper_settings_to_pipeline(runner, monkeypatch, data
 
     # --no-wandb giữ bài test hoàn toàn offline.
     monkeypatch.setattr(runner, "fit_and_evaluate", capture_run)
-    runner.main(["--dataset", dataset, "--group", "E1", "--no-wandb", "--device", "cpu"])
+    output = tmp_path / "result.json"
+    runner.main(["--dataset", dataset, "--group", "E1", "--no-wandb", "--device", "cpu", "--output", str(output)])
+    import json
+    saved = json.loads(output.read_text(encoding="utf-8"))
+    assert saved["config"]["norm"] == "l2"
+    assert saved["config"]["lam"] == lam
+    assert saved["config"]["feature_dtype"] == "float64"
+    assert saved["config"]["lam_mode"] == "fixed"
     cfg = observed["cfg"]
     assert cfg.dim == 25_000
     assert cfg.gamma == 1.0

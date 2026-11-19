@@ -57,11 +57,13 @@ class SufficientStats:
             phi: Đặc trưng, kích thước ``(B, D)``.
             y:   Nhãn lớp ``long``, kích thước ``(B,)``.
         """
+        if self._A is None:
+            raise RuntimeError("Thống kê đã được consume; hãy tạo SufficientStats mới.")
         phi = phi.to(device=self.device, dtype=self.dtype)
         y = y.to(device=self.device)
 
         # A += ΦᵀΦ
-        self._A += phi.T @ phi
+        self._A.addmm_(phi.T, phi)
 
         # Cộng vào tổng và đếm theo lớp
         for c in range(self.num_classes):
@@ -72,8 +74,12 @@ class SufficientStats:
 
         self._N += phi.shape[0]
 
-    def finalize(self) -> tuple[torch.Tensor, torch.Tensor]:
+    def finalize(self, *, consume: bool = False) -> tuple[torch.Tensor, torch.Tensor]:
         """Tính trung bình lớp và hiệp phương sai trong lớp dùng chung.
+
+        Args:
+            consume: Chuyển quyền sở hữu A cho covariance để tránh sao chép D×D.
+                Sau đó không được update/finalize/save đối tượng này nữa.
 
         Returns:
             Cặp ``(means, cov)`` có kích thước ``(C, D)`` và ``(D, D)``.
@@ -81,6 +87,8 @@ class SufficientStats:
         Raises:
             RuntimeError: Nếu chưa gọi ``update`` lần nào.
         """
+        if self._A is None:
+            raise RuntimeError("Thống kê đã được consume.")
         if self._N == 0:
             raise RuntimeError("Chưa có mẫu nào được tích lũy.")
 
@@ -89,13 +97,11 @@ class SufficientStats:
         means = self._tong / dem_safe.unsqueeze(1)  # (C, D)
 
         # S = (A - Σ_c dem[c] μ_c μ_cᵀ) / N
-        correction = torch.zeros_like(self._A)
-        for c in range(self.num_classes):
-            if self._dem[c] > 0:
-                mu_c = means[c].unsqueeze(1)  # (D, 1)
-                correction += self._dem[c] * (mu_c @ mu_c.T)
-
-        cov = (self._A - correction) / self._N
+        cov = self._A if consume else self._A.clone()
+        cov.addmm_((means * self._dem.unsqueeze(1)).T, means, alpha=-1)
+        cov.div_(self._N)
+        if consume:
+            self._A = None
         return means, cov
 
     def save(self, path: str | Path) -> None:
@@ -104,6 +110,8 @@ class SufficientStats:
         Args:
             path: Đường dẫn file đầu ra (thường dùng đuôi ``.pt``).
         """
+        if self._A is None:
+            raise RuntimeError("Không thể lưu thống kê đã consume; lưu trước finalize.")
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         torch.save(
