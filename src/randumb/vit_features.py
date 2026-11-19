@@ -143,6 +143,30 @@ def load_e2_splits(name: str, hf_cache_dir: Optional[Union[str, Path]] = None) -
     return splits
 
 
+def resplit_features(payload: dict, test_fraction: float, seed: int) -> dict:
+    """Gộp train và test của một file đặc trưng rồi chia lại theo lớp với seed khác.
+
+    Chỉ có nghĩa với dataset tự chia (ImageNet-R, ImageNet-A): khi đó train và test
+    cùng lấy từ một split gốc, nên gộp lại là đủ toàn bộ ảnh, khỏi trích đặc trưng lại.
+    File không lưu chỉ số gốc nên ``seed = SPLIT_SEED`` không cho lại đúng cách chia ban đầu;
+    mỗi seed chỉ là một cách chia ngẫu nhiên khác.
+
+    Args:
+        payload: Nội dung file đặc trưng, có ``train_x``, ``train_y``, ``test_x``, ``test_y``.
+        test_fraction: Tỉ lệ mỗi lớp đưa vào test.
+        seed: Seed của phép chia.
+
+    Returns:
+        Bản sao ``payload`` với train và test mới; ``meta`` thêm ``resplit_seed``.
+    """
+    x = torch.cat([payload["train_x"], payload["test_x"]])
+    y = torch.cat([payload["train_y"], payload["test_y"]])
+    train_idx, test_idx = split_indices(y, test_fraction, seed)
+    meta = {**payload.get("meta", {}), "resplit_seed": seed}
+    return {**payload, "train_x": x[train_idx], "train_y": y[train_idx],
+            "test_x": x[test_idx], "test_y": y[test_idx], "meta": meta}
+
+
 def preprocess(images: list, image_size: int = IMAGE_SIZE, mean=None, std=None) -> torch.Tensor:
     """Đổi một lô ảnh PIL thành tensor ``(B, 3, H, W)`` cho ViT.
 

@@ -143,3 +143,17 @@ def test_extract_script_writes_a_file_run_e2_can_read(tmp_path, monkeypatch):
     loaded = vf.load_features(out)
     assert loaded["train_x"].shape == (4, 12) and loaded["test_x"].shape == (2, 12)
     assert isinstance(loaded["meta"]["torch_version"], str)
+
+
+def test_resplit_features_keeps_all_samples_and_class_balance():
+    y = torch.arange(4).repeat_interleave(10)
+    x = torch.arange(40, dtype=torch.float32).unsqueeze(1)
+    payload = {"train_x": x[:30], "train_y": y[:30], "test_x": x[30:], "test_y": y[30:], "meta": {"a": 1}}
+    out = vf.resplit_features(payload, 0.2, seed=3)
+    assert torch.bincount(out["test_y"]).tolist() == [2, 2, 2, 2]
+    merged = torch.cat([out["train_x"], out["test_x"]]).flatten().sort().values
+    assert torch.equal(merged, x.flatten())  # không mất, không trùng mẫu
+    assert torch.equal(out["train_y"], y[out["train_x"].flatten().long()])  # nhãn đi đúng với mẫu
+    assert out["meta"] == {"a": 1, "resplit_seed": 3}
+    other = vf.resplit_features(payload, 0.2, seed=4)
+    assert not torch.equal(out["test_x"], other["test_x"])
