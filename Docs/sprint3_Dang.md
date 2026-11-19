@@ -18,6 +18,12 @@ E1 giữ **D=25.000, γ=1.0**, RFF, một lượt học, λ theo dataset và fli
 
 Nguồn thông số: `Randumbofficial.pdf`, mục 3, Implementation Details. TinyImageNet ở Bảng 6 có cả số 11,1; bảng trên dùng 11,6 tương ứng λ=1e-4. Dạng RFF D chiều, OAS gộp của E1 và nguồn/split dữ liệu hiện tại vẫn có các điểm cần đối chiếu như nhật ký đã ghi; không tuyên bố khớp mọi chi tiết tác giả.
 
+## Bổ sung ngày 19/11 (Kiên)
+
+- **E8 pha A** (chuẩn hóa × γ, 32 run) được thêm vào `run_sprint3.py` để E8 phủ đủ 4 yếu tố của Instruction mục 4.6. Chọn bằng `--group E8-A`; `--group E8` chạy cả A và B. Thiết kế và lý do: [e1_e8_fidelity.md](e1_e8_fidelity.md).
+- Thêm `--dim` để chia phiên E8. Chạy `--dim 5000` trước `--dim 25000`, vì λ tương đối cần run hiệu chỉnh ở D = 5.000.
+- `fit_lda(..., inplace=True)` giờ ghi thừa số Cholesky đè lên `cov` để vừa VRAM của T4 ở D = 25.000.
+
 ## Thiết kế E8 pha B
 
 24 run = CIFAR-10/100 × D∈{5.000,25.000} × shrink∈{OAS gộp, OAS từng lớp, không OAS} × {λ cố định, λ tương đối}; seed 0. Đây là phân tích thăm dò một seed, chưa đo biến thiên qua nhiều seed.
