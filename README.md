@@ -139,6 +139,7 @@ Mỗi thực nghiệm có một dòng. Số liệu chi tiết từng run và ph�
 |---|---|---|---|
 | Kiểm tra môi trường Kaggle (Sprint 0) | [notebooks/00_kaggle_smoke.ipynb](notebooks/00_kaggle_smoke.ipynb) | [6vddfz6r](https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/6vddfz6r) | Trên T4, nhân ma trận `float64` chậm hơn `float32` khoảng 14 lần; 5 dataset E1 đọc được từ Hugging Face |
 | E2: RanDumb và NCM trên đặc trưng ViT-B/16 (4 dataset × 2 backbone) | [notebooks/02_e2_vit.ipynb](notebooks/02_e2_vit.ipynb) | nhóm `E2`, 16 run, link từng run trong [Docs/report4.md](Docs/report4.md) | RanDumb hơn NCM ở cả 8 cặp, giống bài. RanDumb lệch dưới ±4% so với bài trên CIFAR-100, CUB, ImageNet-R; ImageNet-A cao hơn bài 11-17%, có thể do nhóm tự chia train/test |
+| E9: So sánh từng tầng với code gốc tác giả (Verification) | [notebooks/09_e9_verification.ipynb](notebooks/09_e9_verification.ipynb) | [icae4r9o](https://forge.coreweave.com/wandb/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/icae4r9o) | Hai pipeline đồng nhất 100% về mặt giải tích (Agreement 100.0%, Cosine sim $W=1.000000$, $S_{\text{oas}}$ max diff $10^{-17}$). Phát hiện 6 điểm sai khác mấu chốt trong code tác giả so với bài báo (xem notebook và [verification/README.md](verification/README.md)). |
 
 ## Tính toàn vẹn học thuật
 
