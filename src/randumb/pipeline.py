@@ -83,18 +83,30 @@ def resolve_gamma(gamma: Union[str, float], train_x: torch.Tensor) -> float:
     """Đổi γ dạng chữ sang số.
 
     ``"scale"`` cho ``1 / (d · Var(X))``, tính trên toàn bộ phần tử của tập train đã
-    chuẩn hóa, với ``d`` là số chiều sau khi duỗi.
+    chuẩn hóa, với ``d`` là số chiều sau khi duỗi. ``"scale*k"`` nhân giá trị đó với ``k``
+    (E8 thử các bội số quanh ``scale``, Docs/Instruction.md mục 4.6).
 
     Args:
-        gamma: Số thực, chuỗi số, hoặc ``"scale"``.
+        gamma: Số thực, chuỗi số, ``"scale"`` hoặc ``"scale*k"``.
         train_x: Ảnh train đã chuẩn hóa ``(N, H, W, C)``.
 
     Returns:
         Giá trị γ.
+
+    Raises:
+        ValueError: Nếu hệ số ``k`` không dương.
     """
-    if isinstance(gamma, str) and gamma == "scale":
+    if isinstance(gamma, str) and gamma.startswith("scale"):
+        factor = 1.0
+        if gamma != "scale":
+            prefix, _, value = gamma.partition("*")
+            if prefix != "scale" or not value:
+                raise ValueError(f"γ phải có dạng 'scale' hoặc 'scale*k', nhận được '{gamma}'")
+            factor = float(value)
+        if factor <= 0:
+            raise ValueError(f"Hệ số của scale phải dương, nhận được {factor}")
         x = flatten(train_x)
-        return float(1.0 / (x.shape[1] * x.to(torch.float64).var().item()))
+        return float(factor / (x.shape[1] * x.to(torch.float64).var().item()))
     return float(gamma)
 
 

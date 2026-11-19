@@ -50,7 +50,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--dataset", required=True, help="khóa trong randumb.data.DATASETS")
     parser.add_argument("--dim", type=int, default=25_000, help="số chiều D của đặc trưng")
     parser.add_argument("--features", choices=FEATURES, default="rff")
-    parser.add_argument("--gamma", default="1.0", help="mặc định 1.0 theo paper; 'scale' dành cho phân tích độ nhạy")
+    parser.add_argument("--gamma", default="1.0", help="mặc định 1.0 theo paper; 'scale' hoặc 'scale*k' dành cho E8")
     parser.add_argument("--lam", type=float, default=None, help="hệ số ridge λ, mặc định theo dataset trong paper")
     parser.add_argument("--lam-mode", choices=["fixed", "relative"], default="fixed")
     parser.add_argument("--norm", choices=NORMALIZATIONS, default="l2",
