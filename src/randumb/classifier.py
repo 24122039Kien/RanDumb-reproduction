@@ -69,7 +69,8 @@ def fit_lda(means: torch.Tensor, cov: torch.Tensor, lam: float, *, inplace: bool
         means: Trung bình lớp, kích thước ``(C, D)``.
         cov:   Hiệp phương sai đã co, kích thước ``(D, D)``.
         lam:   Hệ số ridge λ ≥ 0.
-        inplace: Cho phép cộng ridge trực tiếp vào covariance đầu vào.
+        inplace: Dùng chính bộ nhớ của ``cov``: cộng ridge vào đó, rồi ghi đè bằng
+            thừa số Cholesky. Sau lời gọi, ``cov`` không còn là covariance.
 
     Returns:
         Ma trận ``w``, kích thước ``(C, D)``.
@@ -82,6 +83,13 @@ def fit_lda(means: torch.Tensor, cov: torch.Tensor, lam: float, *, inplace: bool
     try:
         # Cholesky: A = LLᵀ, giải Lz = μ_cᵀ rồi Lᵀw_c = z
         L = torch.linalg.cholesky(A)                 # (D, D)
+        if inplace:
+            # Ghi L đè lên A rồi bỏ L: trên CUDA, cholesky_solve tự tạo thêm một bản sao
+            # column-major của L. Giữ cả A, L và bản sao là 3 ma trận D×D (14 GiB ở
+            # D = 25.000, float64), vượt VRAM của T4; sau bước này chỉ còn 2.
+            A.copy_(L)
+            del L
+            L = A
         # means: (C, D) → cần giải A w_cᵀ = mu_cᵀ
         # torch.cholesky_solve nhận B dạng (D, C)
         rhs = means.T.contiguous()                   # (D, C)

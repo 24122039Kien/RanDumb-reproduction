@@ -159,4 +159,20 @@ def test_zero_covariance_and_inplace_ridge():
     assert not cov.any()
     actual = fit_lda(means, cov, 0.1, inplace=True)
     torch.testing.assert_close(actual, expected)
-    torch.testing.assert_close(cov, 0.1 * torch.eye(4, dtype=torch.float64))
+    # cov giờ chứa thừa số Cholesky của 0.1·I
+    torch.testing.assert_close(cov, math.sqrt(0.1) * torch.eye(4, dtype=torch.float64))
+
+
+def test_fit_lda_inplace_reuses_cov_memory_for_cholesky_factor():
+    """inplace=True cho cùng nghiệm, và L nằm trong bộ nhớ của cov thay vì một ma trận D×D mới."""
+    gen = torch.Generator().manual_seed(0)
+    x = torch.randn(200, 30, generator=gen, dtype=torch.float64)
+    cov = x.T @ x / 200
+    means = torch.randn(5, 30, generator=gen, dtype=torch.float64)
+    expected = fit_lda(means, cov, 1e-3)
+    reference_L = torch.linalg.cholesky(cov + 1e-3 * torch.eye(30, dtype=torch.float64))
+    pointer = cov.data_ptr()
+    actual = fit_lda(means, cov, 1e-3, inplace=True)
+    torch.testing.assert_close(actual, expected)
+    assert cov.data_ptr() == pointer
+    torch.testing.assert_close(cov, reference_L)
