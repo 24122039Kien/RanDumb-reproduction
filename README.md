@@ -2,7 +2,7 @@
 
 Term project của môn **Nhập môn Học máy (Introduction to Machine Learning)**, chủ đề *never-ending learning*. Nhóm đọc, tự cài lại, chạy lại thực nghiệm và phản biện một bài báo đã công bố trong suốt học kỳ.
 
-> **Trạng thái:** Phần lõi và code E2 đã có trên `main`. Phần chạy E1/E8 của Đăng được chuẩn bị trên nhánh `dang/sprint-3-experiments`; chưa có kết quả E1/E8 được xác nhận tại đây.
+> **Trạng thái (19/11):** Toàn bộ code đã có trên `main`. E2 đã có kết quả; E1 và E8 đã sẵn sàng chạy, chưa có kết quả.
 
 **Thành viên:** *(điền tên và MSSV)*
 **W&B project:** [randumb-reproduction-24TNT](https://forge.coreweave.com/wandb/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT) (public)
@@ -68,7 +68,68 @@ Trạng thái `src/randumb/`: toàn bộ module đã có trên `main`. Đặc tr
 
 ## Cài đặt và chạy
 
-Hướng dẫn phần **Sprint 3 của Đăng (E1 và E8-B)**: [Docs/sprint3_Dang.md](Docs/sprint3_Dang.md), notebook [03_dang_sprint3.ipynb](notebooks/03_dang_sprint3.ipynb). Cấu hình Đăng chốt: **γ=1.0 + L2**, D=25.000 cho E1. Nhật ký ghi rõ các chi tiết paper không công bố đầy đủ. Chạy dữ liệu thật cần máy đủ bộ nhớ và W&B; chưa có kết quả E1/E8 để điền bảng.
+### Môi trường
+
+Các run có số liệu trong bảng kết quả đều chạy trên **Kaggle** (GPU T4, Python 3.13). Laptop chỉ dùng để viết code, chạy test và thử với D nhỏ. Phiên bản thư viện trong [requirements.txt](requirements.txt) được ghim theo đúng môi trường Kaggle; các bản này cần Python 3.11 trở lên.
+
+```bash
+git clone https://github.com/24122039Kien/RanDumb-reproduction.git
+cd RanDumb-reproduction
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+pip install -e .                   # cài package randumb từ src/
+python -m pytest -q                # phải qua hết trước khi chạy thực nghiệm
+```
+
+Dữ liệu được tải tự động từ Hugging Face trong lần chạy đầu, không cần chuẩn bị tay.
+
+| Biến môi trường | Bắt buộc | Ý nghĩa |
+|---|---|---|
+| `WANDB_API_KEY` | Khi log W&B | Khóa W&B. Trên Kaggle đặt trong **Add-ons → Secrets**, không ghi vào code |
+| `WANDB_ENTITY` | Không | Team W&B, mặc định là team của nhóm |
+| `HF_TOKEN` | Không | Token đọc của Hugging Face, giúp tải nhanh hơn |
+| `RANDUMB_DATA_DIR` | Không | Nơi lưu dữ liệu, cache và đặc trưng; mặc định [data/](data/) |
+
+### Chạy thử nhanh trên máy cá nhân
+
+Không cần GPU hay W&B, khoảng một phút:
+
+```bash
+python scripts/run_experiment.py --group smoke --dataset mnist --dim 500 \
+    --max-train 3000 --max-eval 1000 --no-wandb --device cpu
+```
+
+Kết quả in ra dạng JSON. Với cấu hình mặc định (γ = 1,0, chuẩn hóa L2), lệnh trên cho khoảng 92%, thấp hơn 98,3% của bài vì chỉ dùng 3.000 ảnh và D = 500.
+
+### Chạy lại từng thực nghiệm
+
+Cách dễ nhất là import notebook tương ứng vào Kaggle, bật GPU, Internet và Secret `WANDB_API_KEY`, rồi **Run All**. Mỗi notebook tự clone repo, cài thư viện và chạy test trước.
+
+| Thực nghiệm | Notebook Kaggle | Lệnh tương đương | Ghi chú |
+|---|---|---|---|
+| Kiểm tra môi trường | [00_kaggle_smoke.ipynb](notebooks/00_kaggle_smoke.ipynb) | | GPU, phiên bản thư viện, tốc độ `float32`/`float64` |
+| E1 và E8 pha B | [03_dang_sprint3.ipynb](notebooks/03_dang_sprint3.ipynb) | `python scripts/run_sprint3.py --group E1 --device cuda --out-dir outputs/sprint3 --execute` | Cấu hình đã chốt: γ = 1,0, chuẩn hóa L2, D = 25.000, λ theo bài. Bỏ `--execute` để chỉ xem danh sách run; thêm `--dataset mnist` để chia phiên. Chi tiết: [Docs/sprint3_Dang.md](Docs/sprint3_Dang.md) |
+| E2 | [02_e2_vit.ipynb](notebooks/02_e2_vit.ipynb) | `python scripts/extract_vit_features.py --dataset cifar100 --backbone in21k`, rồi `python scripts/run_e2.py --dataset cifar100 --backbone in21k --method randumb` | Khoảng 1 giờ, phần lớn là trích đặc trưng ViT. Giao thức: [Docs/e2_datasets.md](Docs/e2_datasets.md) |
+| E2 bổ sung | [04_e2_followup.ipynb](notebooks/04_e2_followup.ipynb) | `python scripts/run_e2.py ... --method ncm --ncm-metric cosine` và `... --split-seed 1` | Dùng lại file đặc trưng của E2 |
+| E9 | | `python verification/compare_layers_e9.py --dataset cifar10 --num-samples 2000` | So từng tầng với cách làm của code gốc. Muốn chạy chính code gốc: `python verification/setup_official.py` clone vào `verification/_official/` (không commit). Xem [verification/README.md](verification/README.md) |
+
+Mỗi script có `--help` liệt kê đủ tham số. Mọi run đều log seed, cấu hình, phiên bản thư viện và GPU lên W&B.
+
+### Thư viện ngoài nhóm chuẩn của môn
+
+Ngoài numpy, scipy, scikit-learn và torch, repo dùng:
+
+| Thư viện | Lý do |
+|---|---|
+| `wandb` | Theo dõi thực nghiệm, môn yêu cầu |
+| `datasets` | Tải dữ liệu từ Hugging Face bằng code |
+| `timm` | Mô hình ViT-B/16 pre-trained cho E2 (Benchmark F) |
+| `psutil` | Đo RAM đỉnh khi đo giờ |
+| `pillow` | Giải mã, đổi kênh và thu nhỏ ảnh |
+| `pytest` | Chạy kiểm thử |
+
+`scikit-learn` chỉ dùng để đối chiếu trong test và trong `verification/`; RFF, OAS và LDA do nhóm tự cài trong [src/randumb/](src/randumb/).
 
 ## Bảng kết quả
 
