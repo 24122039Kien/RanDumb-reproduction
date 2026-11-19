@@ -64,7 +64,7 @@ Nhóm dự kiến chọn **Core scope** (chưa chốt). Chi tiết từng bướ
 | [verification/](verification/) | Script kiểm chứng với code gốc, không chứa code gốc |
 | [data/](data/) | Nơi lưu dữ liệu tải về và cache khi chạy; nội dung không được commit |
 
-Trạng thái `src/randumb/`: `data.py`, `tracking.py`, `pipeline.py` đã cài trên nhánh `feat/kien/data-pipeline`; `features.py`, `stats.py`, `classifier.py` đã cài trên nhánh của Đăng. Cả hai đang chờ merge vào `main`.
+Trạng thái `src/randumb/`: toàn bộ module đã có trên `main`. Đặc trưng ViT cho E2 nằm ở `vit_features.py`, NCM ở `baselines.py`.
 
 ## Cài đặt và chạy
 
@@ -72,11 +72,12 @@ Trạng thái `src/randumb/`: `data.py`, `tracking.py`, `pipeline.py` đã cài 
 
 ## Bảng kết quả
 
-Mỗi thực nghiệm có một dòng. Chưa có run thực nghiệm nào; dòng dưới là run kiểm tra môi trường.
+Mỗi thực nghiệm có một dòng. Số liệu chi tiết từng run và phân tích sai lệch nằm trong file báo cáo được dẫn ở cột cuối.
 
 | Thực nghiệm | Notebook/script | W&B run | Kết quả cho thấy |
 |---|---|---|---|
 | Kiểm tra môi trường Kaggle (Sprint 0) | [notebooks/00_kaggle_smoke.ipynb](notebooks/00_kaggle_smoke.ipynb) | [6vddfz6r](https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/6vddfz6r) | Trên T4, nhân ma trận `float64` chậm hơn `float32` khoảng 14 lần; 5 dataset E1 đọc được từ Hugging Face |
+| E2: RanDumb và NCM trên đặc trưng ViT-B/16 (4 dataset × 2 backbone) | [notebooks/02_e2_vit.ipynb](notebooks/02_e2_vit.ipynb) | nhóm `E2`, 16 run, link từng run trong [Docs/report4.md](Docs/report4.md) | RanDumb hơn NCM ở cả 8 cặp, giống bài. RanDumb lệch dưới ±4% so với bài trên CIFAR-100, CUB, ImageNet-R; ImageNet-A cao hơn bài 11-17%, có thể do nhóm tự chia train/test |
 
 ## Tính toàn vẹn học thuật
 
