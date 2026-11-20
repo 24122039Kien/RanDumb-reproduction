@@ -98,14 +98,18 @@ CIFAR-10/100 × D ∈ {5.000, 25.000} × shrink ∈ {OAS gộp, OAS từng lớp
 
 ## 5. Cách chạy trên Kaggle
 
-Ở ô 1 của notebook 03, đặt `GROUP`, `DATASET`, `DIM` để chia phiên giữa hai tài khoản:
+Mỗi thành viên chạy một phiên trên tài khoản Kaggle của mình, cùng lúc. Chỉ sửa ô 1 của notebook 03, giữ `DATASET = None`, `SEED = None`, `DIM = None`:
 
-| Phiên | GROUP | DATASET | DIM | Ước lượng GPU |
+| Người | Notebook | GROUP | Số run | Ước lượng GPU |
 |---|---|---|---|---|
-| 1 | `'E1'` | từng dataset | | MNIST 5 phút, CIFAR và mini mỗi cái 8-9 phút, Tiny khoảng 17 phút **cho mỗi seed** |
-| 2 | `'E8'` | | `5000` | Khoảng 40 phút cho 34 run |
-| 3 | `'E8'` | | `25000` | Khoảng 3 giờ cho 22 run |
+| Đăng | 03 | `'E1'` | 15 (5 dataset × 3 seed, D = 25.000) | 2,5-3 giờ, cộng thời gian tải Tiny/mini |
+| Huy | 03 | `'E8-B'` | 24 (shrink × λ) | Khoảng 2 giờ |
+| Kiên | 03 | `'E8-A'` | 32 (chuẩn hóa × γ) | Khoảng 2 giờ |
+| Kiên | 04 | | 40 (E2 bổ sung) | Khoảng 10 phút, cần Input là output notebook E2 của Kiên |
 
-- **Phiên 2 phải chạy trước phiên 3**, vì λ tương đối ở D = 25.000 lấy hệ số từ run D = 5.000.
-- Phiên 2 và 3 phải dùng chung thư mục kết quả. Nếu chạy ở hai phiên Kaggle khác nhau, thêm output của phiên 2 làm Input rồi chép JSON vào `/kaggle/working/sprint3-results` trước khi chạy.
-- Thời gian là ước lượng từ tốc độ float64 đo trên T4 (report2), chưa đo thật. Ô 5 (kiểm tra bộ nhớ ở D = 25.000) phải qua trước khi chạy dữ liệu thật.
+- Chia theo nhóm, không chia theo D: λ tương đối của E8-B lấy hệ số từ run E8-B D = 5.000 `fixed` **trong cùng thư mục kết quả**. Chạy cả E8-B trong một phiên thì script tự xếp thứ tự đúng.
+- E8-A không phụ thuộc run nào khác, nên chạy riêng được.
+- Notebook 04 chỉ Kiên chạy được, vì file đặc trưng ViT nằm trong output notebook E2 của Kiên.
+- Ô 5 (kiểm tra bộ nhớ ở D = 25.000) chạy trước khi tải dữ liệu. Nếu lỗi ở đó thì dừng và báo nhóm, không tự giảm D hoặc đổi dtype.
+- Chạy xong: **Save Version**, tải `summary.csv`, `e1_aggregate.csv` (phiên E1) và các file JSON trong `/kaggle/working/sprint3-results` rồi gửi Kiên.
+- Thời gian là ước lượng từ tốc độ float64 đo trên T4 (report2), chưa đo thật.

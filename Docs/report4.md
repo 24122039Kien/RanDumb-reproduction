@@ -134,3 +134,57 @@ Biểu đồ trong từng run vì vậy không có ý nghĩa. Muốn so sánh n�
 | E1: chốt chuẩn hóa và γ (report3, mục 3) | Đăng | Quá hạn |
 
 **Lưu ý cho 2 việc đầu:** file đặc trưng nằm trong `/kaggle/working/data/features/` của phiên Kaggle vừa chạy. Nếu đã **Save Version**, thêm output của version đó làm Input cho notebook mới để khỏi trích lại khoảng 1 giờ.
+
+**Cập nhật 19/11:** hai việc đầu đã xong, kết quả ở mục 7.
+
+---
+
+## 7. Bổ sung 19/11: kiểm chứng giả thuyết 3.2 và 3.3
+
+Chạy bằng [notebooks/04_e2_followup.ipynb](../notebooks/04_e2_followup.ipynb) trên file đặc trưng của lần chạy chính, 40 run, nhóm W&B `E2`, thẻ `E2-followup`. Số liệu gốc kèm link từng run nằm trong [e2_followup/](e2_followup/).
+
+### 7.1. NCM cosine: giả thuyết 3.3 (độ đo khoảng cách) bị bác bỏ
+
+| Dataset | Backbone | NCM Euclid (%) | NCM cosine (%) | Bài (%) | Lệch tương đối của cosine | W&B run |
+|---|---|---|---|---|---|---|
+| CIFAR-100 | IN-21K | 79,28 | 80,16 | 83,5 | −4,00% | [xypzkx78](https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/xypzkx78) |
+| CIFAR-100 | IN-1K | 82,68 | 82,83 | 78,3 | **+5,79%** | [9uzo1q5r](https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/9uzo1q5r) |
+| CUB | IN-21K | 84,02 | 85,07 | 86,5 | −1,65% | [ovop9s3i](https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/ovop9s3i) |
+| CUB | IN-1K | 84,21 | 84,47 | 84,8 | −0,39% | [dxctgqnh](https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/dxctgqnh) |
+| ImageNet-R | IN-21K | 50,23 | 51,22 | 54,8 | **−6,54%** | [x585b4hp](https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/x585b4hp) |
+| ImageNet-R | IN-1K | 59,30 | 59,22 | 62,5 | **−5,25%** | [uhxdkbxc](https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/uhxdkbxc) |
+| ImageNet-A | IN-21K | 37,27 | 37,13 | 41,4 | **−10,31%** | [yu8mpw1s](https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/yu8mpw1s) |
+| ImageNet-A | IN-1K | 44,13 | 44,60 | 44,3 | +0,68% | [lh7h1311](https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/lh7h1311) |
+
+- Đổi Euclid sang cosine chỉ thay đổi từ −0,14 đến +1,05 điểm. Với IN-21K, NCM vẫn thấp hơn bài 1,4-4,3 điểm ở cả 4 dataset.
+- Theo tiêu chí ±5%, NCM cosine đạt 4/8, so với 3/8 của Euclid. Thay đổi này không đủ giải thích khoảng chênh.
+- **Kết luận:** độ đo khoảng cách không phải nguyên nhân chính. Giả thuyết còn lại là **trọng số backbone** (mục 3.3, ý 2). Deck vẫn dùng NCM Euclid làm số chính và ghi kết quả cosine như một kiểm chứng.
+
+### 7.2. Chia lại ImageNet-R và ImageNet-A: giả thuyết 3.2 bị bác bỏ một phần
+
+Mỗi seed chia là một lần chia ngẫu nhiên 80/20 theo lớp, cùng quy tắc với lần chạy chính (seed 0). ImageNet-A: 6.000 ảnh train, 1.500 ảnh test. ImageNet-R: 24.002 và 5.998.
+
+| Dataset | Backbone | Phương pháp | TB seed 1-4 (%) | Độ lệch chuẩn | Min-max | Seed 0 (%) | Bài (%) |
+|---|---|---|---|---|---|---|---|
+| ImageNet-A | IN-21K | RanDumb | 49,97 | 0,39 | 49,60-50,33 | 49,33 | 42,2 |
+| ImageNet-A | IN-21K | NCM | 37,33 | 0,67 | 36,40-38,00 | 37,27 | 41,4 |
+| ImageNet-A | IN-1K | RanDumb | 54,78 | 0,25 | 54,47-55,07 | 55,00 | 49,5 |
+| ImageNet-A | IN-1K | NCM | 45,40 | 0,43 | 45,00-45,87 | 44,13 | 44,3 |
+| ImageNet-R | IN-21K | RanDumb | 66,06 | 0,67 | 65,39-66,67 | 65,04 | 64,9 |
+| ImageNet-R | IN-21K | NCM | 51,44 | 0,36 | 51,13-51,87 | 50,23 | 54,8 |
+| ImageNet-R | IN-1K | RanDumb | 67,51 | 0,79 | 66,51-68,42 | 66,69 | 66,9 |
+| ImageNet-R | IN-1K | NCM | 59,69 | 0,98 | 58,64-60,65 | 59,30 | 62,5 |
+
+Độ lệch chuẩn là độ lệch chuẩn mẫu qua 4 seed. Link của 32 run nằm trong [e2_followup/e2_followup_resplit_runs.csv](e2_followup/e2_followup_resplit_runs.csv).
+
+- **Cách chia ngẫu nhiên gần như không ảnh hưởng:** độ lệch chuẩn dưới 1 điểm, khoảng min-max tối đa 2 điểm.
+- ImageNet-A với RanDumb vẫn cao hơn bài ở **cả 4 seed**: khoảng 7,8 điểm với IN-21K và 5,3 điểm với IN-1K. Vậy **may rủi của một lần chia không giải thích được** mức lệch 11-17%.
+- Thí nghiệm này chưa loại trừ khả năng **quy tắc chia** của bài khác của nhóm (tỉ lệ khác, hoặc không chia theo lớp). Chỉ so trực tiếp với tập chia của RevisitingCIL mới trả lời được câu này (việc của Huy).
+- Ở ImageNet-A IN-1K, NCM của nhóm khớp bài (45,4 so với 44,3) nhưng RanDumb cao hơn 5,3 điểm. Điều này cho thấy đặc trưng của nhóm không quá khác bài, và phần lệch có thể nằm ở bước LDA. Đây mới là quan sát, chưa kiểm chứng.
+- RanDumb hơn NCM ở cả 32 run chia lại, nên kết luận chính của bài không đổi.
+
+### 7.3. Ý nghĩa cho deck
+
+- Kết luận "RanDumb hơn NCM" **vững với cách chia**: đúng ở cả 5 seed chia (0-4) và cả hai backbone.
+- Khi nói về ImageNet-A, ghi: "lệch không do may rủi chia (4 seed khác, độ lệch chuẩn dưới 0,4 điểm); có thể do quy tắc chia hoặc thiết lập LDA khác bài".
+- NCM IN-21K thấp hơn bài không do độ đo khoảng cách. Nguyên nhân khả dĩ là trọng số backbone.

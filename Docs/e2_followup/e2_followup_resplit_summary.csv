@@ -1,0 +1,9 @@
+dataset,backbone,method,mean,std,min,max,main_run_seed0,paper_accuracy
+imagenet-a,in1k,ncm,45.4,0.43,45.0,45.87,44.13,44.3
+imagenet-a,in1k,randumb,54.78,0.25,54.47,55.07,55.0,49.5
+imagenet-a,in21k,ncm,37.33,0.67,36.4,38.0,37.27,41.4
+imagenet-a,in21k,randumb,49.97,0.39,49.6,50.33,49.33,42.2
+imagenet-r,in1k,ncm,59.69,0.98,58.64,60.65,59.3,62.5
+imagenet-r,in1k,randumb,67.51,0.79,66.51,68.42,66.69,66.9
+imagenet-r,in21k,ncm,51.44,0.36,51.13,51.87,50.23,54.8
+imagenet-r,in21k,randumb,66.06,0.67,65.39,66.67,65.04,64.9
