@@ -1,0 +1,9 @@
+dataset,backbone,final_accuracy,euclidean_main_run,paper_accuracy,relative_deviation_pct,wandb_url
+cifar100,in21k,80.16,79.28,83.5,-4.0,https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/xypzkx78
+cifar100,in1k,82.83,82.68,78.3,5.79,https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/9uzo1q5r
+cub,in21k,85.07,84.02,86.5,-1.65,https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/ovop9s3i
+cub,in1k,84.47,84.21,84.8,-0.39,https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/dxctgqnh
+imagenet-r,in21k,51.22,50.23,54.8,-6.54,https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/x585b4hp
+imagenet-r,in1k,59.22,59.3,62.5,-5.25,https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/uhxdkbxc
+imagenet-a,in21k,37.13,37.27,41.4,-10.31,https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/yu8mpw1s
+imagenet-a,in1k,44.6,44.13,44.3,0.68,https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/lh7h1311
