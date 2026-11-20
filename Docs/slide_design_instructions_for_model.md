@@ -87,7 +87,7 @@ Các yêu cầu này đến từ `ML - HKD.pdf` – tài liệu hướng dẫn c
 
 **Mặt slide:**
 - **Tiêu đề:** Học liên tục trực tuyến trong điều kiện biên khắt khe
-- **Sơ đồ luồng dữ liệu (tự vẽ):**
+- **[CHÈN HÌNH/SƠ ĐỒ 1 – Horizontal Flowchart]:** Sơ đồ luồng dữ liệu Online Continual Learning (xem đặc tả tại Mục 5.4).
   ```
   Luồng dữ liệu: [x1,y1] --> [x2,y2] --> ... --> [xt,yt] --> ...
                        |            |                   |
@@ -120,7 +120,7 @@ Các yêu cầu này đến từ `ML - HKD.pdf` – tài liệu hướng dẫn c
 - **Tiêu đề:** Giả định trung tâm bị thách thức
 - **Câu hỏi trung tâm (hộp lớn, nổi bật):**
   > *"Trong Online Continual Learning, biểu diễn học được từ mạng sâu có thực sự tốt hơn một biểu diễn ngẫu nhiên cố định không hề được học?"*
-- **Sơ đồ so sánh 2 cột (tự vẽ):**
+- **[CHÈN HÌNH/SƠ ĐỒ 2 – Comparison Diagram]:** Sơ đồ đối đầu 2 trường phái Representation (xem Mục 5.4):
   
   | Trường phái truyền thống | RanDumb (Phát hiện mới) |
   |---|---|
@@ -160,7 +160,7 @@ Các yêu cầu này đến từ `ML - HKD.pdf` – tài liệu hướng dẫn c
 
 **Mặt slide:**
 - **Tiêu đề:** Khoảng trống nghiên cứu (Research Gap)
-- **Ma trận định vị 2×2 (tự vẽ):**
+- **[CHÈN HÌNH/SƠ ĐỒ 3 – 2x2 Grid Matrix]:** Ma trận định vị 2×2 Research Gap (xem đặc tả tại Mục 5.4).
   ```
                     CO LUU MAU        KHONG LUU MAU
   DUA TREN      BiC, DER, ER-AML  |  SLDA, RanPAC
@@ -221,6 +221,7 @@ Các yêu cầu này đến từ `ML - HKD.pdf` – tài liệu hướng dẫn c
 
 **Mặt slide:**
 - **Tiêu đề:** Hình thức hóa toán học – Online Continual Learning
+- **[CHÈN HÌNH/SƠ ĐỒ 4 – Timeline Diagram]:** Sơ đồ kịch bản Class-Incremental Streaming qua $K$ tasks (xem Mục 5.4).
 - **Ký hiệu:**
   - Luồng dữ liệu: S = {(x_t, y_t)}_{t=1}^N, x_t trong R^d, y_t trong {1,...,C}
   - Xuất hiện tuần tự K giai đoạn: Y = union_{k=1}^K Y_k, Y_i giao Y_j = rỗng
@@ -244,7 +245,7 @@ Các yêu cầu này đến từ `ML - HKD.pdf` – tài liệu hướng dẫn c
 
 **Mặt slide:**
 - **Tiêu đề:** Kiến trúc giải tích 4 khối của RanDumb
-- **Sơ đồ pipeline tự vẽ (vertical flow):**
+- **[CHÈN HÌNH/SƠ ĐỒ 5 – Vertical Flowchart]:** Sơ đồ Kiến trúc Pipeline 4 khối RanDumb (xem Mục 5.4).
   ```
   Anh dau vao x_t trong R^d
          |
@@ -285,6 +286,7 @@ Các yêu cầu này đến từ `ML - HKD.pdf` – tài liệu hướng dẫn c
 
 **Mặt slide:**
 - **Tiêu đề:** Ánh xạ không gian Hilbert bằng Random Fourier Features
+- **[CHÈN HÌNH/SƠ ĐỒ 6 – Hilbert Mapping Illustration]:** Trực quan hóa hình học phép ánh xạ Bochner & RFF từ 2D sang $D$ chiều (xem Mục 5.4).
 - **Định lý Bochner (nền tảng lý thuyết):**
   - k(x, y) = E_omega[cos(omega^T * (x-y))], omega ~ p(omega)
 - **Công thức RFF (Rahimi & Recht 2007):**
@@ -368,6 +370,7 @@ Các yêu cầu này đến từ `ML - HKD.pdf` – tài liệu hướng dẫn c
 **Mặt slide:**
 - **Tiêu đề:** Thực nghiệm E1: Tái lập Benchmark A – Học từ pixel thô
 - **Thiết lập:** [INSERT: mo ta ngan D, seed, cau hinh]
+- **[CHÈN HÌNH/SƠ ĐỒ 7 – Grouped Bar Chart]:** Biểu đồ cột đối đầu kết quả E1 Paper vs Team trên 5 datasets (xem Mục 5.4).
 - **Bảng kết quả so sánh E1:**
 
 | Dataset | RanDumb (Bai bao) | RanDumb (Nhom tai lap) | Do lech | W&B Run |
@@ -391,6 +394,7 @@ Các yêu cầu này đến từ `ML - HKD.pdf` – tài liệu hướng dẫn c
 **Mặt slide:**
 - **Tiêu đề:** Thực nghiệm E2: Tái lập Benchmark F – ViT-B/16 Features
 - **Thiết lập:** 16 runs (4 datasets × 2 backbones IN-21k/IN-1k); RanDumb vs NCM
+- **[CHÈN HÌNH/SƠ ĐỒ 8 – Grouped Bar Chart]:** Biểu đồ cột kết quả 8 cặp thực nghiệm RanDumb vs NCM (xem Mục 5.4).
 - **Bảng kết quả E2:**
 
 | Dataset | Backbone | RanDumb (Bao) | RanDumb (Nhom) | Lech | W&B |
@@ -438,6 +442,7 @@ Các yêu cầu này đến từ `ML - HKD.pdf` – tài liệu hướng dẫn c
 
 **Mặt slide:**
 - **Tiêu đề:** Ablation Study từ bài báo – Tầm quan trọng từng thành phần
+- **[CHÈN HÌNH/SƠ ĐỒ 9 – Grouped Bar Chart]:** Biểu đồ cột 4 nhóm thể hiện mức sụt giảm khi bỏ OAS / RFF (xem Mục 5.4).
 - **Bảng Ablation:**
 
 | Cau hinh | MNIST | CIFAR-10 | CIFAR-100 | TinyImageNet |
@@ -447,8 +452,7 @@ Các yêu cầu này đến từ `ML - HKD.pdf` – tài liệu hướng dẫn c
 | Bo RFF Embedding | 88.0% | 41.6% | 19.0% | 8.0% |
 | Bo ca hai (NCM tho) | 82.1% | 28.5% | 10.4% | 4.1% |
 
-- **Ve bieu do cot grouped (tu ve):** 4 cau hinh × 4 datasets
-- **Ket luan:** Decorrelation quan trong hon Embedding tren CIFAR-10 (giam 25.6% vs 14%)
+- **Kết luận:** Decorrelation quan trọng hơn Embedding trên CIFAR-10 (giảm 25.6% vs 14%)
 
 **Speaker Notes (< 500 từ):** Phân tích ablation study từ bài báo. Giải thích ý nghĩa từng thành phần: OAS đóng vai trò "cân bằng phương sai", RFF đóng vai trò "nâng chiều". Cả hai đều thiết yếu.
 
@@ -509,10 +513,11 @@ Các yêu cầu này đến từ `ML - HKD.pdf` – tài liệu hướng dẫn c
 
 **Mặt slide:**
 - **Tiêu đề:** Phân tích nguyên nhân sai lệch trong tái lập
-- **3 nhom nguyen nhan:**
-  1. Sai lech tai lieu hoa: gamma paper ≠ gamma code; lambda paper ≠ lambda code
-  2. Sai lech thiet lap: Train/test split (ImageNet-A); seed khong cong bo
-  3. Sai lech ky thuat: Precision float64 vs float32; OAS batch vs streaming
+- **[CHÈN HÌNH/SƠ ĐỒ 10 – Fishbone Diagram]:** Sơ đồ xương cá phân tích 4 nhóm nguyên nhân sai lệch (xem Mục 5.4).
+- **3 nhóm nguyên nhân chính:**
+  1. Sai lệch tài liệu hóa: γ paper ≠ γ code; λ paper ≠ λ code
+  2. Sai lệch thiết lập: Train/test split (ImageNet-A); seed không công bố
+  3. Sai lệch kỹ thuật: Precision float64 vs float32; OAS batch vs streaming
 - **Tóm tắt độ lệch:**
 
 | Thuc nghiem | Dataset | Do lech tuyet doi | Nguyen nhan chinh |
@@ -536,8 +541,8 @@ Các yêu cầu này đến từ `ML - HKD.pdf` – tài liệu hướng dẫn c
 
 **Mặt slide:**
 - **Tiêu đề:** Ảnh hưởng của số chiều RFF (D) đến hiệu năng
-- **Bieu do duong (line chart – tu ve):** Truc x: D in {1K, 5K, 10K, 15K, 25K}; Truc y: Accuracy
-- **Du lieu tu bai bao:**
+- **[CHÈN HÌNH/SƠ ĐỒ 11 – Multi-line Chart]:** Biểu đồ đường Accuracy vs Chiều $D \in [1\text{K}, 25\text{K}]$ có đường gióng bão hòa tại $15\text{K}$ (xem Mục 5.4).
+- **Dữ liệu từ bài báo:**
 
 | Dataset | D=1K | D=5K | D=15K | D=25K | Muc tang 1K→25K |
 |---|---|---|---|---|---|
@@ -546,7 +551,7 @@ Các yêu cầu này đến từ `ML - HKD.pdf` – tài liệu hướng dẫn c
 | CIFAR-100 | ~21.6% | ~25.3% | ~27.5% | 28.6% | +7.0% |
 | TinyImageNet | ~8.6% | ~9.9% | ~10.9% | 11.1% | +2.5% |
 
-- **Ket luan:** Muc tang bao hoa sau D=15K. D=15K la diem can bang tot.
+- **Kết luận:** Mức tăng bão hòa sau $D=15\text{K}$. $D=15\text{K}$ là điểm cân bằng tốt (hiệu năng/chi phí).
 
 **Speaker Notes (< 500 từ):** Giải thích vì sao D lớn hơn thì tốt hơn (xấp xỉ kernel tốt hơn), nhưng có điểm bão hòa. Liên hệ với kết quả thực nghiệm E8 của nhóm.
 
@@ -801,18 +806,25 @@ Speaker Notes:     Calibri Regular, 11-12pt
 - **Slide So do:** Chua 60% dien tich cho diagram, 40% cho caption + citations
 - **Slide Section Header:** Mau nen dam, so section noi bat, tieu de lon
 
-### 5.4. Ghi chú về sơ đồ tự vẽ
+### 5.4. Bảng danh mục hình ảnh và sơ đồ tự vẽ chi tiết
 
-Cac so do **bat buoc phai tu ve** (khong dung hinh tu paper):
-- Slide 2: Luong du lieu online
-- Slide 3: So sanh 2 truong phai
-- Slide 5: Ma tran 2×2 Research Gap
-- Slide 9: Pipeline 4 khoi RanDumb (vertical flow)
-- Slide 14, 15: Bieu do cot ket qua E1, E2
-- Slide 17: Bieu do cot ablation study
-- Slide 21: Line chart Accuracy vs D
+> **Quy định môn học:** Tuyệt đối KHÔNG chụp ảnh màn hình từ paper. Toàn bộ hình ảnh, sơ đồ phải do nhóm/model tự vẽ bằng code (matplotlib, seaborn), SmartArt, hoặc công cụ vẽ vector.
 
-Co the dung PowerPoint SmartArt, draw.io, hoac Python matplotlib de ve roi nhung vao.
+Dưới đây là danh mục chi tiết 11 hình ảnh/sơ đồ xuất hiện trong toàn bộ Slide Deck:
+
+| Slide | Tên hình ảnh / Sơ đồ | Loại hình | Nội dung chi tiết cần thể hiện | Vị trí trên slide & Lưu ý |
+|---|---|---|---|---|
+| **Slide 2** | Sơ đồ luồng dữ liệu Online Continual Learning | Horizontal Flowchart | Luồng ảnh $[x_1, y_1] \to [x_2, y_2] \to \dots \to [x_t, y_t]$ trôi qua mô hình xử lý trực tuyến. Kèm 3 icon/hộp: Single-pass (1 mũi tên), Zero-buffer (thùng rác gạch chéo), Constant memory (RAM cố định). | Căn giữa nửa trên slide (chiếm 45% diện tích). |
+| **Slide 3** | Sơ đồ đối đầu: Học biểu diễn vs Biểu diễn ngẫu nhiên | 2-Column Comparison Diagram | Cột trái (Mạng sâu): Mũi tên đỏ lượn sóng biểu thị Representation Drift / Quên thảm khốc. Cột phải (RanDumb): Phép chiếu RFF cố định phẳng lặng + Linear Classifier vững chắc. | Chia đôi nửa dưới slide, dùng màu đỏ (thất bại) vs xanh (ổn định). |
+| **Slide 5** | Ma trận định vị $2 \times 2$ Research Gap | $2 \times 2$ Grid Matrix | Trục tung: Nguồn biểu diễn (Pretrained vs Pixel thô). Trục hoành: Bộ nhớ (Có lưu mẫu vs Zero-replay). Nêu tên các thuật toán ở 3 ô, ô góc dưới-phải (Pixel thô + Zero-replay) highlight sao vàng cho RanDumb. | Căn giữa slide, chiếm 60% chiều ngang slide. |
+| **Slide 8** | Sơ đồ kịch bản Class-Incremental Streaming | Timeline / Task Sequence Diagram | Dòng thời gian phân chia $K$ task: Task 1 (Lớp 1, 2) $\to$ Task 2 (Lớp 3, 4) $\to \dots$ Mỗi bước dữ liệu cũ biến mất vĩnh viễn, mô hình chỉ cập nhật trạng thái $\theta_t \to \theta_{t+1}$. | Đặt bên phải slide, chiếm 40% diện tích. |
+| **Slide 9** | Sơ đồ Kiến trúc Pipeline 4 khối RanDumb | Vertical Block Diagram (Flowchart) | 4 khối nối nhau bằng mũi tên xuôi: Khối 1 (Chuẩn hóa Z-Score) $\to$ Khối 2 (RFF Cosine Projection) $\to$ Khối 3 (Tích lũy thống kê OAS) $\to$ Khối 4 (Giải hệ Cholesky LDA). | Chiếm toàn bộ nửa trái slide (55% diện tích), màu xanh học thuật #1E3A5F. |
+| **Slide 10** | Minh họa hình học Định lý Bochner & RFF | Hilbert Space Mapping Illustration | Không gian pixel 2D phi tuyến uốn lượn $\to$ Ánh xạ qua $\cos(\Omega x + b)$ $\to$ Không gian Hilbert $D$ chiều nơi các điểm dữ liệu phân tách tuyến tính bằng siêu phẳng. | Nửa phải slide, trực quan hóa cơ chế ánh xạ. |
+| **Slide 14** | Biểu đồ cột kết quả tái lập E1 | Grouped Bar Chart | Trục x: 5 datasets (MNIST, CIFAR-10, CIFAR-100, TinyImageNet, miniImageNet). Trục y: Accuracy (0–100%). Mỗi dataset gồm 2 cột: Cột xám (Paper) vs Cột xanh đậm (Nhóm tái lập). | Nửa phải slide bên cạnh bảng số liệu. |
+| **Slide 15** | Biểu đồ cột kết quả ViT Benchmark F (E2) | Grouped Bar Chart | So sánh RanDumb vs NCM trên 8 cặp thực nghiệm (4 datasets $\times$ 2 backbones). Thể hiện rõ RanDumb luôn cao hơn NCM từ 3% đến 17%. | Đặt dưới bảng kết quả hoặc chiếm 40% diện tích bên phải. |
+| **Slide 17** | Biểu đồ Ablation Study thành phần | Grouped Bar Chart (4 nhóm) | 4 cụm cột ứng với 4 dataset. Mỗi cụm 4 thanh: Full RanDumb, Không OAS, Không RFF, Không cả hai (NCM thô). Thể hiện rõ sự tụt dốc thảm hại khi bỏ OAS. | Căn giữa phía dưới slide. |
+| **Slide 20** | Sơ đồ xương cá phân tích sai lệch (Fishbone) | Cause-and-Effect / Fishbone Diagram | Đầu cá: "Sai lệch thực nghiệm". Các nhánh xương: (1) Tài liệu hóa (γ, λ), (2) Phân chia dữ liệu (split ImageNet-A), (3) Độ chính xác số (float32 vs float64), (4) Phần cứng/thư viện. | Nửa phải slide, bổ trợ cho bảng phân tích nguyên nhân. |
+| **Slide 21** | Biểu đồ đường ảnh hưởng số chiều RFF ($D$) | Multi-line Chart | Trục x: $D \in [1\text{K}, 5\text{K}, 10\text{K}, 15\text{K}, 25\text{K}]$. Trục y: Accuracy. 4 đường biểu diễn 4 dataset. Điểm $D=15\text{K}$ có đường gióng nét đứt ghi chú "Điểm bão hòa tối ưu". | Chiếm 50% diện tích slide (bên phải bảng số liệu). |
 
 ---
 
