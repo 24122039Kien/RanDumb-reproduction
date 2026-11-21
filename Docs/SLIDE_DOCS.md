@@ -121,7 +121,7 @@ Sửa ý "λ quá nhỏ làm giảm CIFAR" thành: λ = 10⁻⁶ làm giảm nh�
 6. **Chênh với PEC trên MNIST:** Bảng 1 in +6,0, Bảng 2 in +5,9.
 7. **So với RanPAC (RP+ReLU):** bài viết "trung bình hơn 3,4%", nhưng tính từ bảng (+3,1, +6,8, +5,5, +1,4, +2,0) ra **3,76**.
 8. **Tiêu đề cột Bảng 6:** ghi CIFAR-100 "(10/1)", đúng ra phải là (100/1).
-9. **Chú thích Bảng 5:** nói RanDumb "vượt mọi phương pháp trừ VR-MCL trên TinyImageNet", nhưng cùng bảng đó GDumb (61,2) cao hơn RanDumb (55,6) trên CIFAR-10.
+9. **"Gap Covered" ở Bảng 1:** con số thực chất là tỉ số RanDumb / Joint. Mọi cột khớp khi làm tròn, trừ OB: 75,3 / 83,8 = 90%, nhưng bài in **92%**. (Ý cũ về chú thích Bảng 5 đã bỏ: chính chú thích đó thừa nhận GDumb tốt nhất trên CIFAR-10.)
 10. **γ = 1,0 (bài) và `gamma='scale'` (code gốc):** xem mục 4.2. Thực nghiệm của nhóm xác nhận chỉ cấu hình của code gốc mới ra đúng số của bài.
 
 ### 3.5. Dọn dẹp
@@ -169,7 +169,7 @@ Link run: `https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/ra
 
 - Ở D = 5.000, `0,5·scale` tốt nhất với cả ba cách chuẩn hóa: CIFAR-10 khoảng 51-52%, CIFAR-100 khoảng 25-26%. `2·scale` thấp hơn mức tốt nhất khoảng 2-5,5 điểm. Số đầy đủ ở [e1-e8-A/summary.csv](e1-e8-A/summary.csv).
 - **Thông điệp cho slide:** γ = 1,0 như bài ghi không chạy được với chuẩn hóa z-score. Cấu hình của code gốc (z-score + `scale`) tái lập gần như chính xác số của bài. Đây là bằng chứng thực nghiệm cho phát hiện #1 của E9.
-- L2 + γ = 1,0 (cấu hình E1 của nhóm) được chạy trong E8 pha B, chưa có CSV trong repo.
+- L2 + γ = 1,0 (cấu hình E1 của nhóm) được chạy trong E8 pha B: 52,18 (t2wnwvb4) / 25,94 (wxp5zmpn). Số đầy đủ ở [e1-e8-B/e8b_summary.csv](e1-e8-B/e8b_summary.csv).
 
 ---
 
