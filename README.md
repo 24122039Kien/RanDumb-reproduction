@@ -2,7 +2,7 @@
 
 Term project của môn **Nhập môn Học máy (Introduction to Machine Learning)**, chủ đề *never-ending learning*. Nhóm đọc, tự cài lại, chạy lại thực nghiệm và phản biện một bài báo đã công bố trong suốt học kỳ.
 
-> **Trạng thái (19/11):** Toàn bộ code đã có trên `main`. E2 đã có kết quả; E1 và E8 đã sẵn sàng chạy, chưa có kết quả.
+> **Trạng thái (21/11):** Toàn bộ code đã có trên `main`. Các thực nghiệm Core (E1, E2, E8, E9) đều đã có kết quả trên W&B; tóm tắt ở mục kết quả bên dưới.
 
 **Thành viên:** *(điền tên và MSSV)*
 **W&B project:** [randumb-reproduction-24TNT](https://forge.coreweave.com/wandb/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT) (public)
@@ -138,6 +138,9 @@ Mỗi thực nghiệm có một dòng. Số liệu chi tiết từng run và ph�
 | Thực nghiệm | Notebook/script | W&B run | Kết quả cho thấy |
 |---|---|---|---|
 | Kiểm tra môi trường Kaggle (Sprint 0) | [notebooks/00_kaggle_smoke.ipynb](notebooks/00_kaggle_smoke.ipynb) | [6vddfz6r](https://wandb.ai/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/6vddfz6r) | Trên T4, nhân ma trận `float64` chậm hơn `float32` khoảng 14 lần; 5 dataset E1 đọc được từ Hugging Face |
+| E1: RanDumb trên pixel (5 dataset × 3 seed; L2 + γ = 1,0, D = 25.000, λ theo bài) | [notebooks/03_dang_sprint3.ipynb](notebooks/03_dang_sprint3.ipynb) | nhóm `E1`, 15 run, ID từng run trong [Docs/e1-e8-B/e1_summary.csv](Docs/e1-e8-B/e1_summary.csv) | MNIST 98,42 (bài 98,3), CIFAR-10 52,36 (55,6), CIFAR-100 26,05 (28,6), TinyImageNet 10,55 (11,6), miniImageNet 15,84 (17,7). Khớp MNIST; thấp hơn bài 1,1-3,2 điểm ở 4 dataset còn lại; độ lệch chuẩn giữa seed ≤ 0,18 điểm |
+| E8 pha A: chuẩn hóa × γ (CIFAR-10/100, D = 5.000 và 25.000, seed 0) | [notebooks/03_dang_sprint3.ipynb](notebooks/03_dang_sprint3.ipynb) | nhóm `E8`, 32 run, [Docs/e1-e8-A/summary.csv](Docs/e1-e8-A/summary.csv) | z-score + γ = 1,0 (như bài ghi) cho kết quả ngẫu nhiên: 10,09 / 1,12. z-score + γ = `scale` (như code gốc) cho 55,56 / 28,62, khớp bài. Đây là nguồn lệch chính của E1 trên CIFAR |
+| E8 pha B: shrink × λ (CIFAR-10/100, L2 + γ = 1,0, seed 0) | [notebooks/03_dang_sprint3.ipynb](notebooks/03_dang_sprint3.ipynb) | nhóm `E8`, 24 run, [Docs/e1-e8-B/e8b_summary.csv](Docs/e1-e8-B/e8b_summary.csv) | Cách shrink gần như không đổi kết quả: ρ của OAS chỉ khoảng 0,0004, còn λ = 10⁻⁵ xấp xỉ phương sai trung bình của đặc trưng. λ tương đối (hiệu dụng khoảng 2·10⁻⁶ ở D = 25.000) tăng 2,2 điểm (CIFAR-10) và 1,3 điểm (CIFAR-100); ở D = 5.000 hai chế độ λ trùng nhau do cách hiệu chỉnh |
 | E2: RanDumb và NCM trên đặc trưng ViT-B/16 (4 dataset × 2 backbone) | [notebooks/02_e2_vit.ipynb](notebooks/02_e2_vit.ipynb) | nhóm `E2`, 16 run, link từng run trong [Docs/report4.md](Docs/report4.md) | RanDumb hơn NCM ở cả 8 cặp, giống bài. RanDumb lệch dưới ±4% so với bài trên CIFAR-100, CUB, ImageNet-R; ImageNet-A cao hơn bài 11-17%, vẫn cao khi chia lại với 4 seed khác (độ lệch chuẩn dưới 0,4 điểm), nên không do may rủi chia. NCM cosine không thu hẹp khoảng chênh của NCM ([report4](Docs/report4.md), mục 7) |
 | E9: So sánh từng tầng với code gốc tác giả (Verification) | [notebooks/09_e9_verification.ipynb](notebooks/09_e9_verification.ipynb) | [icae4r9o](https://forge.coreweave.com/wandb/24122039kiki-tr-ng-i-h-c-khoa-h-c-t-nhi-n-hqg-hcm/randumb-reproduction-24TNT/runs/icae4r9o) | Hai pipeline đồng nhất 100% về mặt giải tích (Agreement 100.0%, Cosine sim $W=1.000000$, $S_{\text{oas}}$ max diff $10^{-17}$). Phát hiện 6 điểm sai khác mấu chốt trong code tác giả so với bài báo (xem notebook và [verification/README.md](verification/README.md)). |
 

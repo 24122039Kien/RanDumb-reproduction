@@ -1,0 +1,6 @@
+dataset,seeds,runs,mean,std,paper,diff_pp,lambda_
+mnist,98.37 / 98.51 / 98.38,1qfwg0cs bciyb4jh c7lzwuh9,98.42,0.08,98.3,+0.12,1e-06
+cifar10,52.18 / 52.52 / 52.38,x3s3o6nj ffpn5wnz qq04qkbw,52.36,0.17,55.6,-3.24,1e-05
+cifar100,25.94 / 25.95 / 26.25,eqyyvvem rpjxl7vi rbz6yo3c,26.05,0.18,28.6,-2.55,1e-05
+tiny-imagenet,10.65 / 10.44 / 10.57,sfkzcrc5 ojcjj56r qnvbhv8r,10.55,0.11,11.6,-1.05,0.0001
+mini-imagenet,15.87 / 15.87 / 15.77,hrdhpnvg 6lx8yajc 9urk6jxw,15.84,0.06,17.7,-1.86,0.0001
